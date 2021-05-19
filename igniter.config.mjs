@@ -20,6 +20,7 @@ export default new TaskOfTasks('a32nx', [
             'src/fadec/build.sh',
             'wasm-opt -O1 -o flybywire-aircraft-a320-neo/SimObjects/AirPlanes/FlyByWire_A320_NEO/panel/fadec.wasm flybywire-aircraft-a320-neo/SimObjects/AirPlanes/FlyByWire_A320_NEO/panel/fadec.wasm'
         ], ['src/fadec', 'flybywire-aircraft-a320-neo/SimObjects/AirPlanes/FlyByWire_A320_NEO/panel/fadec.wasm']),
+        new ExecTask('websocket-server', ['node "node_modules/pkg/lib-es5/bin.js" "src/websocket-server/index.js" --target node12-win-x64 --output "flybywire-aircraft-a320-neo/MCDU SERVER/server.exe"'], ['src/websocket-server']),
     ], true),
 
     new TaskOfTasks('dist', [
