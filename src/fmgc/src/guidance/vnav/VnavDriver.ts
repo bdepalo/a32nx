@@ -6,13 +6,17 @@ import { DecelPathBuilder, DecelPathCharacteristics } from '@fmgc/guidance/vnav/
 import { DescentBuilder } from '@fmgc/guidance/vnav/descent/DescentBuilder';
 import { VnavConfig } from '@fmgc/guidance/vnav/VnavConfig';
 import { GuidanceController } from '@fmgc/guidance/GuidanceController';
+import { FlightPlanManager } from '@fmgc/flightplanning/FlightPlanManager';
 import { Geometry } from '../Geometry';
 import { GuidanceComponent } from '../GuidanceComponent';
+import { GeometryProfile } from './GeometryProfile';
 import { ClimbPathBuilder } from './climb/ClimbPathBuilder';
-import { ClimbProfileBuilderResult } from './climb/ClimbProfileBuilderResult';
+import { Fmgc } from '../GuidanceController';
 
 export class VnavDriver implements GuidanceComponent {
-    currentClimbProfile: ClimbProfileBuilderResult;
+    climbPathBuilder: ClimbPathBuilder;
+
+    currentGeometryProfile: GeometryProfile;
 
     currentDescentProfile: TheoreticalDescentPathCharacteristics
 
@@ -20,7 +24,17 @@ export class VnavDriver implements GuidanceComponent {
 
     constructor(
         private readonly guidanceController: GuidanceController,
+        fmgc: Fmgc,
+        flightPlanManager: FlightPlanManager
     ) {
+        this.climbPathBuilder = new ClimbPathBuilder(fmgc, flightPlanManager);
+    }
+
+    acceptNewMultipleLegGeometry(geometry: Geometry) {
+        // Just put this here to avoid two billion updates per second in update()
+        this.climbPathBuilder.update();
+
+        this.computeVerticalProfile(geometry);
     }
 
     init(): void {
@@ -49,7 +63,9 @@ export class VnavDriver implements GuidanceComponent {
     private computeVerticalProfile(geometry: Geometry) {
         if (geometry.legs.size > 0) {
             if (VnavConfig.VNAV_CALCULATE_CLIMB_PROFILE) {
-                this.currentClimbProfile = ClimbPathBuilder.computeClimbPath(geometry);
+                this.currentGeometryProfile = this.climbPathBuilder.computeClimbPath(geometry);
+
+                console.log(this.currentGeometryProfile);
             }
             this.currentApproachProfile = DecelPathBuilder.computeDecelPath(geometry);
             this.currentDescentProfile = DescentBuilder.computeDescentPath(geometry, this.currentApproachProfile);
