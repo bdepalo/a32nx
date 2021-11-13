@@ -1700,12 +1700,12 @@ In the variables below, {number} should be replaced with one item in the set: { 
 - A32NX_FG_CROSS_TRACK_ERROR
     - Number in nm
     - Used for laternal guidance in mode NAV
-    - Error from desired path
+    - Error from desired path, -ve to the right of track
 
 - A32NX_FG_TRACK_ANGLE_ERROR
     - Number in degrees
     - Used for laternal guidance in mode NAV
-    - Error from desired heading or track
+    - Error from desired heading or track, -ve when clockwise of desired track
 
 - A32NX_FG_PHI_COMMAND
     - Number in degrees
