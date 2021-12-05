@@ -1393,6 +1393,7 @@ impl A320HydraulicBrakeSteerComputerUnit {
     const RUDDER_PEDAL_INPUT_GAIN: f64 = 32.;
     const RUDDER_PEDAL_INPUT_MAP: [f64; 6] = [0., 1., 2., 32., 32., 32.];
     const RUDDER_PEDAL_INPUT_CURVE_MAP: [f64; 6] = [0., 0., 2., 6.4, 6.4, 6.4];
+    const MAX_RUDDER_INPUT_INCLUDING_AUTOPILOT_DEGREE: f64 = 6.;
 
     const SPEED_MAP_FOR_PEDAL_ACTION_KNOT: [f64; 5] = [0., 40., 130., 1500.0, 2800.0];
     const STEERING_ANGLE_FOR_PEDAL_ACTION_DEGREE: [f64; 5] = [1., 1., 0., 0., 0.];
@@ -1638,7 +1639,13 @@ impl A320HydraulicBrakeSteerComputerUnit {
 
         let final_steer_rudder_plus_autopilot = self.pedal_steering_limiter.angle_from_speed(
             self.ground_speed(),
-            steer_angle_from_pedals + steer_angle_from_autopilot,
+            (steer_angle_from_pedals + steer_angle_from_autopilot)
+                .min(Angle::new::<degree>(
+                    Self::MAX_RUDDER_INPUT_INCLUDING_AUTOPILOT_DEGREE,
+                ))
+                .max(Angle::new::<degree>(
+                    -Self::MAX_RUDDER_INPUT_INCLUDING_AUTOPILOT_DEGREE,
+                )),
         );
 
         let steer_angle_from_tiller = self.tiller_steering_limiter.angle_from_speed(
@@ -6132,14 +6139,14 @@ mod tests {
                 .run_one_tick();
 
             test_bed = test_bed
-                .set_autopilot_steering_demand(Ratio::new::<ratio>(1.))
+                .set_autopilot_steering_demand(Ratio::new::<ratio>(1.5))
                 .run_waiting_for(Duration::from_secs_f64(2.));
 
             assert!(test_bed.nose_steering_position().get::<degree>() >= 5.9);
             assert!(test_bed.nose_steering_position().get::<degree>() <= 6.1);
 
             test_bed = test_bed
-                .set_autopilot_steering_demand(Ratio::new::<ratio>(-1.))
+                .set_autopilot_steering_demand(Ratio::new::<ratio>(-1.8))
                 .run_waiting_for(Duration::from_secs_f64(4.));
 
             assert!(test_bed.nose_steering_position().get::<degree>() <= -5.9);
