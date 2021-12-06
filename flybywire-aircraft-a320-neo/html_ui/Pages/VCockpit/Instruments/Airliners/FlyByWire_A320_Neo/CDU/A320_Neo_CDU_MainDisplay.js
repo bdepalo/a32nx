@@ -476,8 +476,11 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
         }
     }
 
-    setLabel(label, row, col = -1) {
+    setLabel(label, row, col = -1, websocketDraw = true) {
         this.sendToSocket("setLabel:" + JSON.stringify([label, row, col]));
+        if (websocketDraw) {
+            this.sendToSocket("draw");
+        }
 
         if (col >= this._labelElements[row].length) {
             return;
@@ -524,8 +527,9 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
      * @param {string|CDU_Field} content
      * @param {number} row
      * @param {number} col
+     * @param {boolean} websocketDraw
      */
-    setLine(content, row, col = -1) {
+    setLine(content, row, col = -1, websocketDraw = true) {
 
         if (content instanceof CDU_Field) {
             const field = content;
@@ -536,6 +540,9 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
         }
 
         this.sendToSocket("setLine:" + JSON.stringify([content, row, col]));
+        if (websocketDraw) {
+            this.sendToSocket("draw");
+        }
 
         if (col >= this._lineElements[row].length) {
             return;
@@ -588,33 +595,33 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
             if (template[tIndex]) {
                 if (large) {
                     if (template[tIndex][1] !== undefined) {
-                        this.setLine(template[tIndex][0], i, 0);
-                        this.setLine(template[tIndex][1], i, 1);
-                        this.setLine(template[tIndex][2], i, 2);
-                        this.setLine(template[tIndex][3], i, 3);
+                        this.setLine(template[tIndex][0], i, 0, false);
+                        this.setLine(template[tIndex][1], i, 1, false);
+                        this.setLine(template[tIndex][2], i, 2, false);
+                        this.setLine(template[tIndex][3], i, 3, false);
                     } else {
-                        this.setLine(template[tIndex][0], i, -1);
+                        this.setLine(template[tIndex][0], i, -1, false);
                     }
                 } else {
                     if (template[tIndex][1] !== undefined) {
-                        this.setLabel(template[tIndex][0], i, 0);
-                        this.setLabel(template[tIndex][1], i, 1);
-                        this.setLabel(template[tIndex][2], i, 2);
-                        this.setLabel(template[tIndex][3], i, 3);
+                        this.setLabel(template[tIndex][0], i, 0, false);
+                        this.setLabel(template[tIndex][1], i, 1, false);
+                        this.setLabel(template[tIndex][2], i, 2, false);
+                        this.setLabel(template[tIndex][3], i, 3, false);
                     } else {
-                        this.setLabel(template[tIndex][0], i, -1);
+                        this.setLabel(template[tIndex][0], i, -1, false);
                     }
                 }
             }
             tIndex = 2 * i + 2;
             if (template[tIndex]) {
                 if (template[tIndex][1] !== undefined) {
-                    this.setLine(template[tIndex][0], i, 0);
-                    this.setLine(template[tIndex][1], i, 1);
-                    this.setLine(template[tIndex][2], i, 2);
-                    this.setLine(template[tIndex][3], i, 3);
+                    this.setLine(template[tIndex][0], i, 0, false);
+                    this.setLine(template[tIndex][1], i, 1, false);
+                    this.setLine(template[tIndex][2], i, 2, false);
+                    this.setLine(template[tIndex][3], i, 3, false);
                 } else {
-                    this.setLine(template[tIndex][0], i, -1);
+                    this.setLine(template[tIndex][0], i, -1, false);
                 }
             }
         }
@@ -640,6 +647,7 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
                 }
             });
         });
+        this.sendToSocket("draw");
     }
 
     /**
@@ -650,6 +658,8 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
      * @param {boolean} right - whether the right arrow will be displayed
      */
     setArrows(up, down, left, right) {
+        this.sendToSocket(`setArrows:${JSON.stringify([up, down, left, right])}`);
+        this.sendToSocket("draw");
         this.arrowHorizontal.style.opacity = (left || right) ? "1" : "0";
         this.arrowVertical.style.opacity = (up || down) ? "1" : "0";
         if (up && down) {
@@ -668,15 +678,15 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
         }
     }
 
-    clearDisplay() {
-        this.setTitle("UNTITLED");
+    clearDisplay(webSocketDraw = false) {
+        this.setTitle("");
         this.setPageCurrent(0);
         this.setPageCount(0);
         for (let i = 0; i < 6; i++) {
-            this.setLabel("", i, -1);
+            this.setLabel("", i, -1, webSocketDraw);
         }
         for (let i = 0; i < 6; i++) {
-            this.setLine("", i, -1);
+            this.setLine("", i, -1, webSocketDraw);
         }
         this.onLeftInput = [];
         this.onRightInput = [];

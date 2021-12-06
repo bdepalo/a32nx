@@ -18,6 +18,7 @@ wss.on('error', (err) => {
 
 wss.on('connection', (ws) => {
     ws.on('message', (message) => {
+        console.log(message);
         wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(message);
