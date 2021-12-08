@@ -124,6 +124,29 @@ class CDUAvailableDeparturesPage {
                     }
                 }
             }
+            let up = false;
+            let down = false;
+            if (pageCurrent < maxPage) {
+                mcdu.onUp = () => {
+                    pageCurrent++;
+                    if (pageCurrent < 0) {
+                        pageCurrent = 0;
+                    }
+                    CDUAvailableDeparturesPage.ShowPage(mcdu, airport, pageCurrent, sidSelection);
+                };
+                up = true;
+            }
+            if (pageCurrent > 0) {
+                mcdu.onDown = () => {
+                    pageCurrent--;
+                    if (pageCurrent < 0) {
+                        pageCurrent = 0;
+                    }
+                    CDUAvailableDeparturesPage.ShowPage(mcdu, airport, pageCurrent, sidSelection);
+                };
+                down = true;
+            }
+            mcdu.setArrows(up, down, true, true);
             mcdu.setTemplate([
                 ["DEPARTURES {small}FROM{end} {green}" + airport.ident + "{end}"],
                 ["{sp}RWY", "TRANS{sp}", "{sp}SID"],
@@ -160,29 +183,6 @@ class CDUAvailableDeparturesPage {
             } else {
                 maxPage = airportInfo.oneWayRunways.length - 4;
             }
-            let up = false;
-            let down = false;
-            if (pageCurrent < maxPage) {
-                mcdu.onUp = () => {
-                    pageCurrent++;
-                    if (pageCurrent < 0) {
-                        pageCurrent = 0;
-                    }
-                    CDUAvailableDeparturesPage.ShowPage(mcdu, airport, pageCurrent, sidSelection);
-                };
-                up = true;
-            }
-            if (pageCurrent > 0) {
-                mcdu.onDown = () => {
-                    pageCurrent--;
-                    if (pageCurrent < 0) {
-                        pageCurrent = 0;
-                    }
-                    CDUAvailableDeparturesPage.ShowPage(mcdu, airport, pageCurrent, sidSelection);
-                };
-                down = true;
-            }
-            mcdu.setArrows(up, down, true, true);
             mcdu.onPrevPage = () => {
                 CDUAvailableDeparturesPage.ShowPage(mcdu, airport, 0, !sidSelection);
             };
