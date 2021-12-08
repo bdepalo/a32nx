@@ -4,6 +4,7 @@ import { useSimVar } from '@instruments/common/simVars';
 import { IconArrowLeft, IconArrowRight } from '@tabler/icons';
 import { HttpError } from '@flybywiresim/api-client';
 import { PopUp } from '@shared/popup';
+import { NXDataStore } from '@shared/persistence';
 import { SelectGroup, SelectItem } from '../Components/Form/Select';
 import { usePersistentNumberProperty, usePersistentProperty } from '../../Common/persistence';
 import Button from '../Components/Button/Button';
@@ -248,6 +249,8 @@ const SimOptionsPage = () => {
     const [mcduTimeout, setMcduTimeout] = usePersistentProperty('CONFIG_MCDU_KB_TIMEOUT', '60');
     const [tcasDebug, setTcasDebug] = usePersistentProperty('TCAS_DEBUG', '0');
 
+    const [mcduServerUrl, setMcduServerUrl] = usePersistentProperty('CONFIG_EXTERNAL_MCDU_URL', '127.0.0.1:8080');
+
     const [dynamicRegistration, setDynamicRegistration] = usePersistentProperty('DYNAMIC_REGISTRATION_DECAL', '0');
 
     const [realisticTiller, setRealisticTiller] = usePersistentProperty('REALISTIC_TILLER_ENABLED', '0');
@@ -409,6 +412,29 @@ const SimOptionsPage = () => {
                                 if (!Number.isNaN(event) && parseInt(event) >= 5 && parseInt(event) <= 120) {
                                     setMcduTimeout(event.trim());
                                 }
+                            }}
+                        />
+                    </div>
+
+                    {/* TODO: move this text box over to the right */}
+                    <div className="py-4 flex flex-row justify-between items-center">
+                        <span>
+                            <span className="text-lg text-gray-300">External MCDU Server URL</span>
+                        </span>
+                        <SimpleInput
+                            className="w-30 ml-1.5 px-5 py-1.5 text-lg text-gray-300 rounded-lg bg-navy-light
+                            border-2 border-navy-light focus-within:outline-none focus-within:border-teal-light-contrast text-center disabled"
+                            value={mcduServerUrl}
+                            noLabel
+                            onChange={(event) => {
+                                setMcduServerUrl(event);
+                            }}
+                        />
+                        <Button
+                            className="bg-teal-light-contrast border-teal-light-contrast"
+                            text="Connect"
+                            onClick={() => {
+                                NXDataStore.listener.triggerToAllSubscribers('A32NX_WEBSOCKET_CONNECT');
                             }}
                         />
                     </div>

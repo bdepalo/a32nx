@@ -10,7 +10,7 @@ type SubscribeCancellation = () => void;
 export class NXDataStore {
     private static mListener: ViewListener.ViewListener;
 
-    private static get listener() {
+    static get listener() {
         if (this.mListener === undefined) {
             this.mListener = RegisterViewListener('JS_LISTENER_SIMVARS');
         }
