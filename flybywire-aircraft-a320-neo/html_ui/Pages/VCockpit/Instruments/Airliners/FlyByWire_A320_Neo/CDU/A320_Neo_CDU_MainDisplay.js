@@ -30,8 +30,6 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
         };
         this.fmgcMesssagesListener = RegisterViewListener('JS_LISTENER_SIMVARS');
         this.setupFmgcTriggers();
-        this.socketStatus = 'DISABLED';
-        Coherent.on('A32NX_WEBSOCKET_CONNECT', this.connectWebsocket);
         this.page = {
             SelfPtr: false,
             Current: 0,
@@ -294,6 +292,12 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
         NXDataStore.subscribe('*', () => {
             this.requestUpdate();
         });
+
+        setInterval(() => {
+            if (!this.socket || this.socket.readyState !== 1) {
+                this.connectWebsocket();
+            }
+        }, 5000);
     }
 
     requestUpdate() {
@@ -530,8 +534,6 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
             };
             content = content.getValue();
         }
-
-
 
         if (col >= this._lineElements[row].length) {
             return;
@@ -1443,7 +1445,11 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
     }
 
     /* END OF MCDU AOC MESSAGE SYSTEM */
-    /* WEBSOCKETS */
+    /* WEBSOCKET */
+
+    /**
+     * Attempts to connect to a websocket server on 127.0.0.1:8080
+     */
     connectWebsocket() {
         if (this.socket) {
             this.socket.close();
@@ -1454,38 +1460,12 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
             clearTimeout(this.socketTimeout);
         }
 
-        this.socketStatus = "CONNECTING";
-
-        const url = NXDataStore.get("CONFIG_EXTERNAL_MCDU_URL", "127.0.0.1:8080");
+        const url = "127.0.0.1:8080";
         this.socket = new WebSocket(`ws://${url}`);
-        this.socketTimeout = setTimeout(() => {
-            if (this.socket && this.socket.readyState !== WebSocket.OPEN) {
-                this.socket.close();
-                this.socketStatus = "FAILED";
-                this.socketTimeout = setTimeout(() => {
-                    this.socketStatus = "DISCONNECTED";
-                }, 5000);
-            }
-        }, 5000);
-
         this.socket.onopen = () => {
-            console.log("Connected to WebSocket");
             (new NXNotif).showNotification({title: "MCDU CONNECTED", message: "Successfully connected to MCDU server.", timeout: 5000});
-            this.socketStatus = "CONNECTED";
-        };
-
-        this.socket.onclose = () => {
-            if (this.socketStatus !== "FAILED") {
-                console.log("WebSocket connection lost");
-                (new NXNotif).showNotification({title: "MCDU DISCONNECTED", message: "Lost connected to MCDU server.", timeout: 10000});
-                this.socketStatus = "DISCONNECTED";
-            }
-        };
-
-        this.socket.onerror = () => {
-            console.warn("WebSocket connection failed");
-            (new NXNotif).showNotification({title: "MCDU FAILED", message: "Lost connected to MCDU server.", timeout: 10000});
-            this.socketStatus = "FAILED";
+            this.sendToSocket("mcduConnected");
+            this.sendUpdate();
         };
 
         this.socket.addEventListener('message', (event) => {
@@ -1493,18 +1473,25 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
             if (message.startsWith("event:")) {
                 this.onEvent(`1_BTN_${message.substring(6)}`);
             }
+            if (message === "requestUpdate") {
+                this.sendUpdate();
+            }
         });
     }
 
     /**
+     * Sends a message to the websocket server (if connected)
      * @param {string} message
      */
     sendToSocket(message) {
-        if (this.socketStatus === "CONNECTED" && this.socket) {
+        if (this.socket && this.socket.readyState) {
             this.socket.send(message);
         }
     }
 
+    /**
+     * Sends an update to the websocket server (if connected) with the current state of the MCDU
+     */
     sendUpdate() {
         const content = {
             lines: [
@@ -1527,6 +1514,6 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
         };
         this.sendToSocket(`update:${JSON.stringify(content)}`);
     }
-    /* END OF WEBSOCKETS */
+    /* END OF WEBSOCKET */
 }
 registerInstrument("a320-neo-cdu-main-display", A320_Neo_CDU_MainDisplay);

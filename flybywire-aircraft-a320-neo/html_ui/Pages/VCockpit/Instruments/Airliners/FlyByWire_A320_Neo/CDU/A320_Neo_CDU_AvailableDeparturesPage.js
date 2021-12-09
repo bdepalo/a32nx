@@ -126,6 +126,27 @@ class CDUAvailableDeparturesPage {
             }
             let up = false;
             let down = false;
+            let maxPage = 0;
+            if (sidSelection) {
+                if (selectedRunway) {
+                    for (const departure of airportInfo.departures) {
+                        for (const transition of departure.runwayTransitions) {
+                            if (transition.name.indexOf(selectedRunway.designation) !== -1) {
+                                maxPage++;
+                                break;
+                            }
+                        }
+                    }
+                    maxPage -= 3;
+                } else {
+                    maxPage = airportInfo.departures.length - 3;
+                }
+                if (selectedDeparture) {
+                    maxPage = Math.max(maxPage, selectedDeparture.enRouteTransitions.length - 4);
+                }
+            } else {
+                maxPage = airportInfo.oneWayRunways.length - 4;
+            }
             if (pageCurrent < maxPage) {
                 mcdu.onUp = () => {
                     pageCurrent++;
@@ -162,27 +183,6 @@ class CDUAvailableDeparturesPage {
                 rows[7],
                 insertRow
             ]);
-            let maxPage = 0;
-            if (sidSelection) {
-                if (selectedRunway) {
-                    for (const departure of airportInfo.departures) {
-                        for (const transition of departure.runwayTransitions) {
-                            if (transition.name.indexOf(selectedRunway.designation) !== -1) {
-                                maxPage++;
-                                break;
-                            }
-                        }
-                    }
-                    maxPage -= 3;
-                } else {
-                    maxPage = airportInfo.departures.length - 3;
-                }
-                if (selectedDeparture) {
-                    maxPage = Math.max(maxPage, selectedDeparture.enRouteTransitions.length - 4);
-                }
-            } else {
-                maxPage = airportInfo.oneWayRunways.length - 4;
-            }
             mcdu.onPrevPage = () => {
                 CDUAvailableDeparturesPage.ShowPage(mcdu, airport, 0, !sidSelection);
             };
