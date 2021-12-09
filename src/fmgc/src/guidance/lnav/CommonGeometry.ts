@@ -1,8 +1,5 @@
 import { Coordinates } from '@fmgc/flightplanning/data/geo';
 import { ControlLaw, LateralPathGuidance } from '@fmgc/guidance/ControlLaws';
-import { MathUtils } from '@shared/MathUtils';
-import { Constants } from '@shared/Constants';
-import { Convert } from '@shared/Convert';
 
 /**
  * Compute the remaining distance around an arc

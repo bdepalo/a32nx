@@ -221,7 +221,7 @@ export class PathCaptureTransition extends Transition {
         return 1;
     }
 
-    getGuidanceParameters(ppos: LatLongAlt, trueTrack: number, tas: Knots): GuidanceParameters | null {
+    getGuidanceParameters(ppos: LatLongAlt, trueTrack: number, _tas: Knots): GuidanceParameters | null {
         return this.nextLeg.getGuidanceParameters(ppos, trueTrack);
     }
 
