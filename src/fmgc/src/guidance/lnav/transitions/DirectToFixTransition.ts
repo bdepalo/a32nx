@@ -155,7 +155,7 @@ export class DirectToFixTransition extends Transition {
         const a3 = Geo.getGreatCircleBearing(turnCentre, nextFix);
         const a5 = acos(this.radius / distanceToFix);
 
-        trackChange = MathUtils.diffAngle(a2, MathUtils.diffAngle(turnDirection * a5, a3));
+        trackChange = MathUtils.diffAngle(a2, MathUtils.diffAngle(turnDirection * a5, a3), turnDirectionConstraint);
 
         const ftp = Geo.computeDestinationPoint(turnCentre, this.radius, this.previousLeg.outboundCourse + trackChange - 90 * turnDirection);
 
