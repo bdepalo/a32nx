@@ -71,7 +71,7 @@ export class FixedRadiusTransition extends Transition {
         const courseChange = mod(this.nextLeg.inboundCourse - this.previousLeg.outboundCourse + 180, 360) - 180;
 
         // Sweep angle
-        this.sweepAngle = Math.abs(MathUtils.diffAngle(this.previousLeg.outboundCourse, this.nextLeg.inboundCourse));
+        this.sweepAngle = MathUtils.diffAngle(this.previousLeg.outboundCourse, this.nextLeg.inboundCourse);
 
         // Always at least 5 degrees turn
         const minBankAngle = 5;
@@ -141,7 +141,7 @@ export class FixedRadiusTransition extends Transition {
 
     get distance(): NauticalMiles {
         const circumference = 2 * Math.PI * this.radius;
-        return circumference / 360 * this.angle;
+        return circumference / 360 * Math.abs(this.sweepAngle);
     }
 
     /**
@@ -160,8 +160,7 @@ export class FixedRadiusTransition extends Transition {
     private turningPoints;
 
     private computeTurningPoints(): [LatLongAlt, LatLongAlt] {
-        const bisecting = (180 - Math.abs(this.sweepAngle)) / 2;
-        const tad = this.radius / Math.tan(bisecting * Avionics.Utils.DEG2RAD);
+        const tad = this.radius * Math.tan(Math.abs(this.sweepAngle / 2) * Avionics.Utils.DEG2RAD);
 
         const { lat, long } = this.previousLeg.fix.infos.coordinates;
 
@@ -171,6 +170,7 @@ export class FixedRadiusTransition extends Transition {
             lat,
             long,
         );
+
         const outbound = Avionics.Utils.bearingDistanceToCoordinates(
             this.nextLeg.inboundCourse,
             tad,
@@ -181,8 +181,8 @@ export class FixedRadiusTransition extends Transition {
         this.centre = Avionics.Utils.bearingDistanceToCoordinates(
             Avionics.Utils.clampAngle(this.previousLeg.outboundCourse + (this.clockwise ? 90 : -90)),
             this.radius,
-            lat,
-            long,
+            inbound.lat,
+            inbound.long,
         );
 
         return [inbound, outbound];
@@ -199,7 +199,7 @@ export class FixedRadiusTransition extends Transition {
     getDistanceToGo(ppos: Coordinates): NauticalMiles {
         const [itp] = this.getTurningPoints();
 
-        return arcDistanceToGo(ppos, itp, this.centre, this.clockwise ? this.angle : -this.angle);
+        return arcDistanceToGo(ppos, itp, this.centre, this.sweepAngle);
     }
 
     getGuidanceParameters(ppos: LatLongAlt, trueTrack: number): GuidanceParameters | null {
@@ -210,7 +210,7 @@ export class FixedRadiusTransition extends Transition {
 
     getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): LatLongData | undefined {
         const distanceRatio = distanceBeforeTerminator / this.distance;
-        const angleFromTerminator = distanceRatio * this.angle;
+        const angleFromTerminator = distanceRatio * Math.abs(this.sweepAngle);
 
         const centerToTerminationBearing = Avionics.Utils.computeGreatCircleHeading(this.centre, this.getTurningPoints()[1]);
 
