@@ -8,12 +8,6 @@
     src: url("HoneywellMCDUSmall.ttf");
 }
 
-.screen-svg {
-    width: 71%;
-    margin-left: 15%;
-    display: block;
-}
-
 .screen {
     --displayBackground: rgba(13, 20, 35, 1);
     --displaySeparator: #3c3c3c;
@@ -40,8 +34,8 @@
     --mcduRed: #ff0000;
     --mcduMagenta: #ff94ff;
 
-    --mcdu-font-size: calc(0.03763 * var(--app-width));
-    --mcdu-line-height: calc(0.04118 * var(--app-width));
+    --mcdu-font-size: calc(calc(0.053 * var(--screen-height)) * var(--app-width));
+    --mcdu-line-height: calc(calc(0.058 * var(--screen-height)) * var(--app-width));
 
     font-family: "HoneywellMCDU", monospace;
 
@@ -54,7 +48,12 @@
     position: relative;
     width: 71%;
     left: 15%;
-    height: calc(var(--app-width) * .71);
+    height: calc(var(--app-width) * var(--screen-height));
+}
+
+.fullscreen .screen {
+  left: 0;
+  width: 100%;
 }
 
 .label {

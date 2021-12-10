@@ -6,6 +6,7 @@ import { McduButtons } from './McduButtons';
 import { WebsocketContext } from './WebsocketContext';
 
 function App() {
+    const [fullscreen, setFullscreen] = useState(false);
     const socketUrl = `ws://${window.location.hostname}:8080`;
 
     const [content, setContent] = useState(
@@ -24,8 +25,8 @@ function App() {
                 ['', '', ''],
                 ['', '', ''],
             ],
-            scratchpad: '',
-            title: '',
+            scratchpad: 'ABCDEFGHIJKLMNOPQRSTUV',
+            title: 'TEST',
             arrows: [false, false, false, false],
         },
     );
@@ -52,11 +53,27 @@ function App() {
     }, [lastMessage]);
 
     return (
-        <div className="App">
-            <WebsocketContext.Provider value={{ sendMessage, lastMessage, readyState }}>
-                <McduScreen content={content} />
-                <McduButtons />
-            </WebsocketContext.Provider>
+        <div className={fullscreen ? 'fullscreen' : 'normal'}>
+            <div className="App">
+                <WebsocketContext.Provider value={{ sendMessage, lastMessage, readyState }}>
+                    {!fullscreen && (
+                        <>
+                            <McduScreen content={content} />
+                            <McduButtons />
+                            <div className="button-grid" style={{ left: `${184 / 10.61}%`, top: `${158 / 16.50}%`, width: `${706 / 10.61}%`, height: `${60 / 16.50}%` }}>
+                                <div className="button-row">
+                                    <div className="button" title="Fullscreen" onClick={() => setFullscreen(!fullscreen)} />
+                                </div>
+                            </div>
+                        </>
+                    )}
+                    {fullscreen && (
+                        <div title="Exit fullscreen" onClick={() => setFullscreen(false)}>
+                            <McduScreen content={content} />
+                        </div>
+                    )}
+                </WebsocketContext.Provider>
+            </div>
         </div>
     );
 }
