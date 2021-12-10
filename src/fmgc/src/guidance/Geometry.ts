@@ -83,7 +83,7 @@ export class Geometry {
             console.time('geometry_recompute');
         }
 
-        for (let i = activeLegIdx ?? 0; this.legs.get(i); i++) {
+        for (let i = activeLegIdx ?? 0; this.legs.get(i) || this.legs.get(i + 1); i++) {
             const prevLegInbound = this.transitions.get(i - 2) ?? this.legs.get(i - 2);
             const prevLeg = this.legs.get(i - 1);
             const inboundTransition = this.transitions.get(i - 1);
@@ -96,7 +96,7 @@ export class Geometry {
                     console.log(`[FMS/Geometry/Recompute] No leg at #${i}`);
                 }
 
-                return;
+                continue;
             }
 
             const predictWithCurrentSpeed = i < activeLegIdx + 3;
