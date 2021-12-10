@@ -8,7 +8,12 @@ export class CourseChange {
         trackChange: Degrees,
         radius: NauticalMiles,
     ): Degrees {
-        const interceptAngleSign = Math.abs(turnCenterDistance) >= radius ? -1 : 1;
+        let interceptAngleSign;
+        if (turnCenterDistance > 0) {
+            interceptAngleSign = Math.abs(turnCenterDistance) >= radius ? -1 : 1;
+        } else {
+            interceptAngleSign = Math.abs(turnCenterDistance) >= radius ? 1 : -1;
+        }
 
         return turnDirection * (Math.abs(trackChange) + interceptAngleSign * 45);
     }
