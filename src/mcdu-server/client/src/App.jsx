@@ -25,8 +25,8 @@ function App() {
                 ['', '', ''],
                 ['', '', ''],
             ],
-            scratchpad: 'ABCDEFGHIJKLMNOPQRSTUV',
-            title: 'TEST',
+            scratchpad: '',
+            title: '',
             arrows: [false, false, false, false],
         },
     );
