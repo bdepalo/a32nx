@@ -65,6 +65,10 @@ export class PathCaptureTransition extends Transition {
     private ftp: Coordinates;
 
     recomputeWithParameters(isActive: boolean, tas: Knots, gs: MetresPerSecond, ppos: Coordinates, trueTrack: DegreesTrue, previousGuidable: Guidable) {
+        if (this.isFrozen) {
+            return;
+        }
+
         if (!(previousGuidable instanceof Leg)) {
             throw new Error('[FMS/Geometry/PathCapture] previousGuidable must be a leg');
         }

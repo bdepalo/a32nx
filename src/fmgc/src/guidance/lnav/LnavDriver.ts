@@ -362,6 +362,8 @@ export class LnavDriver implements GuidanceComponent {
 
         // Set turn state based on turn direction
         if (outboundTransition && (outboundTransition instanceof PathCaptureTransition || outboundTransition instanceof CourseCaptureTransition)) {
+            outboundTransition.freeze();
+
             if (outboundTransition.turnDirection === TurnDirection.Left) {
                 this.turnState = LnavTurnState.ForceLeftTurn;
             } else if (outboundTransition.turnDirection === TurnDirection.Right) {
