@@ -30,7 +30,7 @@ export class GuidanceController {
 
     efisVectors: EfisVectors;
 
-     activeGeometry: Geometry | null;
+    activeGeometry: Geometry | null;
 
     temporaryGeometry: Geometry | null;
 
@@ -94,8 +94,8 @@ export class GuidanceController {
 
         this.updateGeometries();
 
-        this.leftEfisState = {} as any;
-        this.rightEfisState = {} as any;
+        this.leftEfisState = { mode: Mode.ARC, range: 10 };
+        this.rightEfisState = { mode: Mode.ARC, range: 10 };
         this.efisStateForSide = {
             L: this.leftEfisState,
             R: this.rightEfisState,
