@@ -6,6 +6,7 @@ import { Leg } from '@fmgc/guidance/lnav/legs/Leg';
 import { GuidanceParameters } from '@fmgc/guidance/ControlLaws';
 import { LnavConfig } from '@fmgc/guidance/LnavConfig';
 import { courseToFixDistanceToGo, courseToFixGuidance } from '@fmgc/guidance/lnav/CommonGeometry';
+import { IFLeg } from '@fmgc/guidance/lnav/legs/IF';
 import { PathVector, PathVectorType } from '../PathVector';
 
 export class CALeg extends Leg {
@@ -46,8 +47,11 @@ export class CALeg extends Leg {
     recomputeWithParameters(isActive: boolean, _tas: Knots, _gs: Knots, ppos: Coordinates, _trueTrack: DegreesTrue, previousGuidable: Guidable, _nextGuidable: Guidable) {
         this.inboundGuidable = previousGuidable;
 
+        // FIXME somehow after reloads the isRunway property is gone, so consider airports as runways for now
+        const afterRunway = previousGuidable instanceof IFLeg && (previousGuidable.fix.isRunway || previousGuidable.fix.icao.startsWith('A'));
+
         // We assign / spread properties here to avoid copying references and causing bugs
-        if (isActive) {
+        if (isActive && !afterRunway) {
             this.wasMovedByPpos = true;
 
             if (!this.start) {
