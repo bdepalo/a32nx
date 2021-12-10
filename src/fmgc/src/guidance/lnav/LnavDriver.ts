@@ -174,6 +174,11 @@ export class LnavDriver implements GuidanceComponent {
                     SimVar.SetSimVarValue('L:A32NX_FG_CURRENT_LATERAL_LAW', 'number', params.law);
                 }
 
+                // Send bank limit to FG
+                const bankLimit = maxBank(tas, /* FIXME */ true);
+
+                SimVar.SetSimVarValue('L:A32NX_FG_PHI_LIMIT', 'Degrees', bankLimit);
+
                 switch (params.law) {
                 case ControlLaw.LATERAL_PATH:
                     let {

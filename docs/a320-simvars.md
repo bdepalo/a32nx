@@ -1728,6 +1728,11 @@ In the variables below, {number} should be replaced with one item in the set: { 
     - Number
     - Used as data transport for event `H:A320_Neo_FCU_VS_SET`
 
+- A32NX_FG_PHI_LIMIT
+    - Number in Degrees
+    - Indicates the current bank limit requested by the FM
+    - Always positive
+
 - A32NX_FG_CROSS_TRACK_ERROR
     - Number in nm
     - Used for laternal guidance in mode NAV
