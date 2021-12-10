@@ -15,6 +15,11 @@ export class CourseChange {
             interceptAngleSign = Math.abs(turnCenterDistance) >= radius ? 1 : -1;
         }
 
+        // Flip the sign if turning left
+        if (turnDirection < 0) {
+            interceptAngleSign *= -1;
+        }
+
         return turnDirection * (Math.abs(trackChange) + interceptAngleSign * 45);
     }
 
