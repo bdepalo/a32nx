@@ -46,7 +46,7 @@ function App() {
         if (lastMessage != null) {
             const messageType = lastMessage.data.split(':')[0];
             if (messageType === 'update') {
-                setContent(JSON.parse(lastMessage.data.substring(lastMessage.data.indexOf(':') + 1)));
+                setContent(JSON.parse(lastMessage.data.substring(lastMessage.data.indexOf(':') + 1)).left);
             }
         }
     }, [lastMessage]);

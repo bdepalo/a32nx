@@ -1493,7 +1493,7 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
      * Sends an update to the websocket server (if connected) with the current state of the MCDU
      */
     sendUpdate() {
-        const content = {
+        const left = {
             lines: [
                 this._labels[0],
                 this._lines[0],
@@ -1512,6 +1512,8 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
             title: this._title,
             arrows: this._arrows
         };
+        const right = left;
+        const content = {right, left};
         this.sendToSocket(`update:${JSON.stringify(content)}`);
     }
     /* END OF WEBSOCKET */
