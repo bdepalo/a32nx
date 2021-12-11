@@ -1,7 +1,6 @@
-
 .App {
-    --app-width: min(100vw, calc(100vh * var(--aspect-ratio)));
-    --app-height: calc(min(100vh, calc(100vw * calc(1 / var(--aspect-ratio)))) - calc(var(--app-width) * var(--top-padding)));
+    --app-width: min(100vw, calc(var(--vh) * var(--aspect-ratio)));
+    --app-height: calc(min(var(--vh), calc(100vw * calc(1 / var(--aspect-ratio)))) - calc(var(--app-width) * var(--top-padding)));
     height: var(--app-height);
     padding-top: calc(var(--app-width) * var(--top-padding));
     left: calc(50vw - calc(var(--app-width) / 2));
@@ -11,8 +10,8 @@
 
 .normal {
   --aspect-ratio: calc(1061/1650);
-  --top-padding: .12;
-  --screen-height: .71;
+  --top-padding: .146;
+  --screen-scale: .69;
 }
 
 .normal .App {
@@ -24,6 +23,6 @@
 .fullscreen {
   --aspect-ratio: 1.21234964;
   --top-padding: 0;
-  --screen-height: 1;
+  --screen-scale: 1;
   cursor: pointer;
 }

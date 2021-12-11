@@ -45,8 +45,7 @@ export const McduScreen = ({ content }) => {
             <span className="arrow-horizontal" dangerouslySetInnerHTML={{ __html: `${content.arrows[2] ? '←' : '\xa0'}${content.arrows[3] ? '→' : '\xa0'}\xa0` }} />
             <Line cols={[content.titleLeft, content.page, content.title]} />
             {lines}
-            <span className="arrow-vertical" dangerouslySetInnerHTML={{ __html: `${content.arrows[1] ? '↓' : '\xa0'}${content.arrows[0] ? '↑' : '\xa0'}\xa0` }} />
-            <Line cols={[content.scratchpad, '', '']} />
+            <Line cols={[content.scratchpad, `${content.arrows[1] ? '↓' : ' '}${content.arrows[0] ? '↑' : ' '}`, '']} />
         </div>
     );
 };
