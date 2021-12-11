@@ -8,33 +8,53 @@ export class CourseChange {
         trackChange: Degrees,
         radius: NauticalMiles,
     ): Degrees {
-        let interceptAngleSign;
-        if (turnCenterDistance > 0) {
-            interceptAngleSign = Math.abs(turnCenterDistance) >= radius ? -1 : 1;
-        } else {
-            interceptAngleSign = Math.abs(turnCenterDistance) >= radius ? 1 : -1;
+        if (turnDirection > 0) {
+            if (turnCenterDistance >= radius) {
+                return trackChange - 45;
+            }
+            return trackChange + 45;
         }
 
-        // Flip the sign if turning left
-        if (turnDirection < 0) {
-            interceptAngleSign *= -1;
+        if (-turnCenterDistance >= radius) {
+            return trackChange + 45;
         }
 
-        return turnDirection * (Math.abs(trackChange) + interceptAngleSign * 45);
+        return trackChange - 45;
     }
 
-    static acute(
+    static reverse(
         turnDirection: number,
         turnCenterDistance: NauticalMiles,
         trackChange: Degrees,
         radius: NauticalMiles,
     ): Degrees {
-        // From same side
-        if ((trackChange > 0 && turnCenterDistance >= radius) || (trackChange < 0 && turnCenterDistance <= -radius)) {
-            return turnDirection * (45 - Math.abs(trackChange));
+        if (trackChange > 0) {
+            if (-turnCenterDistance >= radius) {
+                return trackChange + 45;
+            }
+            return trackChange - 45;
         }
 
-        // From other side (course overshoot)
+        if (Math.abs(turnCenterDistance) >= radius) {
+            return trackChange + 45;
+        }
+
+        return trackChange - 45;
+    }
+
+    static acuteFar(
+        turnDirection: number,
+        turnCenterDistance: NauticalMiles,
+        trackChange: Degrees,
+    ): Degrees {
+        return turnDirection * (45 - Math.abs(trackChange));
+    }
+
+    static acuteNear(
+        turnDirection: number,
+        turnCenterDistance: NauticalMiles,
+        trackChange: Degrees,
+    ): Degrees {
         return turnDirection * (Math.abs(trackChange) + 45);
     }
 }

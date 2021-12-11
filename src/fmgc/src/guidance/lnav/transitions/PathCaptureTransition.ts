@@ -75,6 +75,7 @@ export class PathCaptureTransition extends Transition {
 
         const targetTrack = previousGuidable.outboundCourse;
 
+        const naturalTurnDirectionSign = Math.sign(MathUtils.diffAngle(targetTrack, this.nextLeg.inboundCourse));
         const constrainedTurnDirection = this.nextLeg instanceof XFLeg ? this.nextLeg.fix.turnDirection : TurnDirection.Unknown;
 
         const initialTurningPoint = this.previousLeg.getPathEndPoint();
@@ -122,7 +123,9 @@ export class PathCaptureTransition extends Transition {
                 // Turn direction is to be flipped, FBW-22-05
                 turnCenterDistance = Math.sign(MathUtils.diffAngle(Geo.getGreatCircleBearing(turnCenter, this.nextLeg.getPathEndPoint()), this.nextLeg.outboundCourse))
                     * Geo.distanceToLeg(turnCenter, this.nextLeg);
-                courseChange = CourseChange.acute(turnDirection, turnCenterDistance, deltaTrack, radius);
+                courseChange = CourseChange.acuteFar(turnDirection, turnCenterDistance, deltaTrack);
+            } else {
+                courseChange = CourseChange.acuteNear(turnDirection, turnCenterDistance, deltaTrack);
             }
         } else if (Math.abs(deltaTrack) >= 45 && !compareTurnDirections(turnDirection, constrainedTurnDirection)) {
             turnCenter = Geo.computeDestinationPoint(initialTurningPoint, radius, targetTrack - turnDirection * 90);
@@ -131,16 +134,10 @@ export class PathCaptureTransition extends Transition {
                 * Geo.distanceToLeg(turnCenter, this.nextLeg);
         }
 
-        if (LnavConfig.DEBUG_PREDICTED_PATH) {
-            this.predictedPath.push({
-                type: PathVectorType.DebugPoint,
-                startPoint: turnCenter,
-                annotation: 'PATH CAPTURE CENTRE',
-            });
-        }
+        // Omit 45 degree intercept segment if possible
+        const turnCenterOnOtherSide = (deltaTrack >= 0 && turnCenterDistance >= 0) || (deltaTrack < 0 && turnCenterDistance < 0);
 
-        // Omit 45 degree intercept Segment
-        if (distanceLimit <= Math.abs(turnCenterDistance) && Math.abs(turnCenterDistance) < radius) {
+        if (turnCenterOnOtherSide && distanceLimit <= Math.abs(turnCenterDistance) && Math.abs(turnCenterDistance) < radius) {
             const intercept = Geo.placeBearingPlaceDistanceIntercept(this.nextLeg.getPathEndPoint(), turnCenter, this.nextLeg.outboundCourse + 180, radius);
 
             this.itp = initialTurningPoint;
@@ -155,11 +152,23 @@ export class PathCaptureTransition extends Transition {
             });
 
             if (LnavConfig.DEBUG_PREDICTED_PATH) {
-                this.predictedPath.push({
-                    type: PathVectorType.DebugPoint,
-                    startPoint: intercept,
-                    annotation: 'PATH CAPTURE INTCPT',
-                });
+                this.predictedPath.push(
+                    {
+                        type: PathVectorType.DebugPoint,
+                        startPoint: initialTurningPoint,
+                        annotation: 'PATH CAPTURE ARC START',
+                    },
+                    {
+                        type: PathVectorType.DebugPoint,
+                        startPoint: turnCenter,
+                        annotation: 'PATH CAPTURE CENTRE',
+                    },
+                    {
+                        type: PathVectorType.DebugPoint,
+                        startPoint: intercept,
+                        annotation: 'PATH CAPTURE INTCPT',
+                    },
+                );
             }
 
             this.isComputed = true;
@@ -168,9 +177,19 @@ export class PathCaptureTransition extends Transition {
         }
 
         if (Math.abs(deltaTrack) < 45) {
-            courseChange = CourseChange.acute(turnDirection, turnCenterDistance, deltaTrack, radius);
+            if ((deltaTrack > 0 && turnCenterDistance >= radius) || (deltaTrack < 0 && turnCenterDistance <= -radius)) {
+                courseChange = CourseChange.acuteFar(turnDirection, turnCenterDistance, deltaTrack);
+            } else {
+                courseChange = CourseChange.acuteNear(turnDirection, turnCenterDistance, deltaTrack);
+            }
         } else {
-            courseChange = CourseChange.normal(turnDirection, turnCenterDistance, deltaTrack, radius);
+            const isReverse = !compareTurnDirections(naturalTurnDirectionSign, constrainedTurnDirection);
+
+            if (isReverse) {
+                courseChange = CourseChange.reverse(turnDirection, turnCenterDistance, deltaTrack, radius);
+            } else {
+                courseChange = CourseChange.normal(turnDirection, turnCenterDistance, deltaTrack, radius);
+            }
         }
 
         const finalTurningPoint = Geo.computeDestinationPoint(turnCenter, radius, targetTrack + courseChange - 90 * turnDirection);
@@ -197,11 +216,28 @@ export class PathCaptureTransition extends Transition {
         );
 
         if (LnavConfig.DEBUG_PREDICTED_PATH) {
-            this.predictedPath.push({
-                type: PathVectorType.DebugPoint,
-                startPoint: interceptPoint,
-                annotation: 'PATH CAPTURE INTCPT',
-            });
+            this.predictedPath.push(
+                {
+                    type: PathVectorType.DebugPoint,
+                    startPoint: initialTurningPoint,
+                    annotation: 'PATH CAPTURE ARC START',
+                },
+                {
+                    type: PathVectorType.DebugPoint,
+                    startPoint: turnCenter,
+                    annotation: 'PATH CAPTURE CENTRE',
+                },
+                {
+                    type: PathVectorType.DebugPoint,
+                    startPoint: finalTurningPoint,
+                    annotation: 'PATH CAPTURE ARC EMD',
+                },
+                {
+                    type: PathVectorType.DebugPoint,
+                    startPoint: interceptPoint,
+                    annotation: 'PATH CAPTURE INTCPT',
+                },
+            );
         }
     }
 
