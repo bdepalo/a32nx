@@ -8,7 +8,6 @@ const path = require('path');
 const fs = require('fs');
 
 // This tells pkg to include these files in the binary
-path.join(__dirname, 'client/build/404.html');
 path.join(__dirname, 'client/build/android-chrome-192x192.png');
 path.join(__dirname, 'client/build/android-chrome-512x512.png');
 path.join(__dirname, 'client/build/apple-touch-icon-180x180.png');
@@ -49,8 +48,8 @@ http.createServer((request, response) => {
     fs.readFile(path.join(__dirname, './client/build/', filePath), (error, content) => {
         if (error) {
             if (error.code === 'ENOENT') {
-                fs.readFile('./client/build/404.html', (error, content) => {
-                    response.writeHead(404, { 'Content-Type': contentType });
+                fs.readFile(path.join(__dirname, './client/build/index.html'), (error, content) => {
+                    response.writeHead(200, { 'Content-Type': 'text/html' });
                     response.end(content, 'utf-8');
                 });
             } else {

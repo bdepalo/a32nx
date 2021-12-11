@@ -6,7 +6,7 @@ import { McduButtons } from './McduButtons';
 import { WebsocketContext } from './WebsocketContext';
 
 function App() {
-    const [fullscreen, setFullscreen] = useState(false);
+    const [fullscreen, setFullscreen] = useState(window.location.href.endsWith('fullscreen'));
     const socketUrl = `ws://${window.location.hostname}:8080`;
 
     const [content, setContent] = useState(
