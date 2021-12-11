@@ -37,7 +37,7 @@ export const LnavConfig = {
     /**
      * Whether to print SVG path generation debug info
      */
-    DEBUG_PATH_DRAWING: true,
+    DEBUG_PATH_DRAWING: false,
 
     /**
      * Whether to print FMS timing information
