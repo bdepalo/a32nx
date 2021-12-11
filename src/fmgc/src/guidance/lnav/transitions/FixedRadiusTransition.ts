@@ -116,12 +116,6 @@ export class FixedRadiusTransition extends Transition {
         return true;
     }
 
-    get angle(): Degrees {
-        const bearingFrom = this.previousLeg.outboundCourse;
-        const bearingTo = this.nextLeg.inboundCourse;
-        return Math.abs(MathUtils.diffAngle(bearingFrom, bearingTo));
-    }
-
     isAbeam(ppos: LatLongData): boolean {
         const turningPoints = this.getTurningPoints();
         if (!turningPoints) {
