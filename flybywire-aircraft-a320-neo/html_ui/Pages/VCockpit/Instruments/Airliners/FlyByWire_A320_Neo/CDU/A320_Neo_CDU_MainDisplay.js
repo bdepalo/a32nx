@@ -260,10 +260,10 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
                         const sender = msg["from"]["flight"];
 
                         const lines = [];
-                        lines.push("FROM " + sender + "[color]cyan");
+                        lines.push("{cyan}FROM " + sender + "{end}");
                         const incLines = msg["message"].split(";");
-                        incLines.forEach(l => lines.push(l.concat("[color]green")));
-                        lines.push('---------------------------[color]white');
+                        incLines.forEach(l => lines.push(`{green}${l}{end}`));
+                        lines.push('{white}------------------------{end}');
 
                         const newMessage = { "id": Date.now(), "type": "FREE TEXT (" + sender + ")", "time": '00:00', "opened": null, "content": lines, };
                         let timeValue = SimVar.GetGlobalVarValue("ZULU TIME", "seconds");
@@ -1431,7 +1431,9 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
 
         const formattedValues = lines.map((l) => {
             return l.replace(/\[color]cyan/g, "<br/>")
+                .replace(/{end}/, "<br/>")
                 .replace(/(\[color][a-z]*)/g, "")
+                .replace(/{[a-z]*}/g, "")
                 .replace(/-{3,}/g, "<br/><br/>");
         });
 

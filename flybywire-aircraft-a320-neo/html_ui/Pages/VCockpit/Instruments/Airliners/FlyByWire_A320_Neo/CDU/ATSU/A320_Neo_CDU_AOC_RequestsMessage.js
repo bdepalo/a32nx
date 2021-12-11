@@ -41,16 +41,16 @@ class CDUAocRequestsMessage {
 
         mcdu.setTemplate([
             ["AOC MSG DISPLAY"],
-            [`[b-text]${message["opened"]} VIEWED[color]green`, `${currentMesssageCount}/${mcdu.messages.length}${msgArrows}`],
-            [`[s-text]${lines[offset] ? lines[offset] : ""}`],
-            [`[b-text]${lines[offset + 1] ? lines[offset + 1] : ""}`],
-            [`[s-text]${lines[offset + 2] ? lines[offset + 2] : ""}`],
-            [`[b-text]${lines[offset + 3] ? lines[offset + 3] : ""}`],
-            [`[s-text]${lines[offset + 4] ? lines[offset + 4] : ""}`],
-            [`[b-text]${lines[offset + 5] ? lines[offset + 5] : ""}`],
-            [`[s-text]${lines[offset + 6] ? lines[offset + 6] : ""}`],
-            [`[b-text]${lines[offset + 7] ? lines[offset + 7] : ""}`],
-            [`[s-text]${lines[offset + 8] ? lines[offset + 8] : ""}`],
+            [`${message["opened"]} VIEWED[color]green`, `${currentMesssageCount}/${mcdu.messages.length}${msgArrows}`],
+            [`{small}${lines[offset] ? lines[offset] : ""}{end}`],
+            [`${lines[offset + 1] ? lines[offset + 1] : ""}`],
+            [`{small}${lines[offset + 2] ? lines[offset + 2] : ""}{end}`],
+            [`${lines[offset + 3] ? lines[offset + 3] : ""}`],
+            [`{small}${lines[offset + 4] ? lines[offset + 4] : ""}{end}`],
+            [`${lines[offset + 5] ? lines[offset + 5] : ""}`],
+            [`{small}${lines[offset + 6] ? lines[offset + 6] : ""}{end}`],
+            [`${lines[offset + 7] ? lines[offset + 7] : ""}`],
+            [`{small}${lines[offset + 8] ? lines[offset + 8] : ""}{end}`],
             ["RETURN TO"],
             ["<RCVD MSGS", "PRINT*[color]cyan"]
         ]);
