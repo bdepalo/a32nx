@@ -3,6 +3,7 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
         super(...arguments);
         this._registered = false;
         this._title = undefined;
+        this._titleLeft = '';
         this._pageCurrent = undefined;
         this._pageCount = undefined;
         this._labels = [];
@@ -439,6 +440,7 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
 
     setTitleLeft(content) {
         if (!content) {
+            this._titleLeft = "";
             this._titleLeftElement.textContent = "";
             return;
         }
@@ -627,6 +629,9 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
         if (this._titleElement !== null) {
             this._titleElement.innerHTML = this._formatCell(this._titleElement.innerHTML);
         }
+        if (this._titleLeftElement !== null) {
+            this._titleLeftElement.innerHTML = this._formatCell(this._titleLeftElement.innerHTML);
+        }
         this._lineElements.forEach((row) => {
             row.forEach((column) => {
                 if (column !== null) {
@@ -673,6 +678,7 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
 
     clearDisplay(webSocketDraw = false) {
         this.setTitle("");
+        this.setTitleLeft("");
         this.setPageCurrent(0);
         this.setPageCount(0);
         for (let i = 0; i < 6; i++) {
@@ -1510,6 +1516,8 @@ class A320_Neo_CDU_MainDisplay extends FMCMainDisplay {
             ],
             scratchpad: this.scratchpad._displayUnit._scratchpadElement.textContent,
             title: this._title,
+            titleLeft: `{small}${this._titleLeft}{end}`,
+            page: this._pageCount > 0 ? `{small}${this._pageCurrent}/${this._pageCount}{end}` : '',
             arrows: this._arrows
         };
         const right = left;

@@ -27,6 +27,8 @@ function App() {
             ],
             scratchpad: '',
             title: '',
+            titleLeft: '',
+            page: '',
             arrows: [false, false, false, false],
         },
     );
