@@ -1,6 +1,6 @@
 import { Coordinates } from '@fmgc/flightplanning/data/geo';
 import { GuidanceParameters } from '@fmgc/guidance/ControlLaws';
-import { PathVector, PathVectorType } from '@fmgc/guidance/lnav/PathVector';
+import { PathVector, pathVectorLength, pathVectorPoint, PathVectorType } from '@fmgc/guidance/lnav/PathVector';
 
 export abstract class Guidable {
     protected constructor() {
@@ -58,7 +58,16 @@ export abstract class Guidable {
      *
      * @param distanceBeforeTerminator
      */
-    abstract getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): Coordinates | undefined;
+    getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): Coordinates | undefined {
+        for (const vector of this.predictedPath.reverse()) {
+            const length = pathVectorLength(vector);
+
+            if (length > distanceBeforeTerminator) {
+                return pathVectorPoint(vector, distanceBeforeTerminator);
+            }
+        }
+        return undefined;
+    }
 
     /**
      * Path vectors for drawing on the ND

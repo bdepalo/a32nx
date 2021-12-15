@@ -29,8 +29,6 @@ export abstract class Transition extends Guidable {
 
     abstract getGuidanceParameters(ppos: Coordinates, trueTrack: Degrees, tas: Knots);
 
-    abstract getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): Coordinates | undefined;
-
     abstract getDistanceToGo(ppos: Coordinates);
 
     abstract getTurningPoints(): [Coordinates, Coordinates];

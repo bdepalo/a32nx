@@ -5,7 +5,7 @@ import { Transition } from '@fmgc/guidance/lnav/Transition';
 import { GuidanceParameters } from '@fmgc/guidance/ControlLaws';
 import { Coordinates } from '@fmgc/flightplanning/data/geo';
 import { Guidable } from '@fmgc/guidance/Guidable';
-import { arcDistanceToGo, arcGuidance } from '../CommonGeometry';
+import { arcDistanceToGo, arcGuidance, arcLength } from '../CommonGeometry';
 import { PathVector, PathVectorType } from '../PathVector';
 import { CFLeg } from '../legs/CF';
 
@@ -134,8 +134,7 @@ export class FixedRadiusTransition extends Transition {
     }
 
     get distance(): NauticalMiles {
-        const circumference = 2 * Math.PI * this.radius;
-        return circumference / 360 * Math.abs(this.sweepAngle);
+        return arcLength(this.radius, this.sweepAngle);
     }
 
     /**
@@ -200,20 +199,6 @@ export class FixedRadiusTransition extends Transition {
         const [itp] = this.getTurningPoints();
 
         return arcGuidance(ppos, trueTrack, itp, this.centre, this.sweepAngle);
-    }
-
-    getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): LatLongData | undefined {
-        const distanceRatio = distanceBeforeTerminator / this.distance;
-        const angleFromTerminator = distanceRatio * Math.abs(this.sweepAngle);
-
-        const centerToTerminationBearing = Avionics.Utils.computeGreatCircleHeading(this.centre, this.getTurningPoints()[1]);
-
-        return Avionics.Utils.bearingDistanceToCoordinates(
-            Avionics.Utils.clampAngle(centerToTerminationBearing + (this.clockwise ? -angleFromTerminator : angleFromTerminator)),
-            this.radius,
-            this.centre.lat,
-            this.centre.long,
-        );
     }
 
     getNominalRollAngle(gs: Knots): Degrees {

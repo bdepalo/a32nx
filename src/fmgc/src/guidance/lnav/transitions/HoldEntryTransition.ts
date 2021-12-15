@@ -448,11 +448,6 @@ export class HoldEntryTransition extends Transition {
         this.setHxEntry();
     }
 
-    getPseudoWaypointLocation(_distanceBeforeTerminator: NauticalMiles): LatLongData | undefined {
-        // TODO
-        return undefined;
-    }
-
     getPathStartPoint(): Coordinates {
         return this.getTurningPoints()[0];
     }

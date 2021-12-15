@@ -70,6 +70,26 @@ export function arcGuidance(ppos: Coordinates, trueTrack: Degrees, itp: Coordina
 }
 
 /**
+ * Computes a point along a course to a fix
+ *
+ * @param distanceFromEnd distance before end of line
+ * @param course          course of the line to the fix
+ * @param fix             self-explanatory
+ */
+export function pointOnCourseToFix(
+    distanceFromEnd: NauticalMiles,
+    course: DegreesTrue,
+    fix: Coordinates,
+): Coordinates {
+    return Avionics.Utils.bearingDistanceToCoordinates(
+        Avionics.Utils.clampAngle(course + 180),
+        distanceFromEnd,
+        fix.lat,
+        fix.long,
+    );
+}
+
+/**
  * Computes a point along an arc at a distance before its termination
  *
  * @param distanceFromFtp distance before end of arc
@@ -84,7 +104,7 @@ export function pointOnArc(
     sweepAngle: Degrees,
 ): Coordinates {
     const radius = Avionics.Utils.computeGreatCircleDistance(centreFix, ftp);
-    const distanceRatio = distanceFromFtp / (Math.PI * 2 * radius);
+    const distanceRatio = distanceFromFtp / arcLength(radius, sweepAngle);
     const angleFromFtp = -distanceRatio * sweepAngle;
 
     const centerToTerminationBearing = Avionics.Utils.computeGreatCircleHeading(centreFix, ftp);
@@ -143,4 +163,10 @@ export function courseToFixGuidance(ppos: Coordinates, trueTrack: Degrees, cours
         crossTrackError,
         phiCommand: 0,
     };
+}
+
+export function arcLength(radius: NauticalMiles, sweepAngle: Degrees): NauticalMiles {
+    const circumference = 2 * Math.PI * radius;
+
+    return circumference / 360 * Math.abs(sweepAngle);
 }

@@ -384,7 +384,6 @@ export class Geometry {
         outbound?: Transition,
     ): [number, number, number] {
         let inboundLength = 0;
-        let legPartLength = 0;
         let outboundLength = 0;
 
         if (outbound) {
@@ -403,9 +402,6 @@ export class Geometry {
             }
         }
 
-        legPartLength = leg.distance
-            - (inbound instanceof FixedRadiusTransition ? inbound.unflownDistance : inboundLength) - (outbound instanceof FixedRadiusTransition ? outbound.unflownDistance : 0);
-
-        return [inboundLength, legPartLength, outboundLength];
+        return [inboundLength, leg.distance, outboundLength];
     }
 }

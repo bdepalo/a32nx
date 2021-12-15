@@ -5,7 +5,6 @@ import { SegmentType } from '@fmgc/flightplanning/FlightPlanSegment';
 import { GuidanceParameters } from '@fmgc/guidance/ControlLaws';
 import { courseToFixDistanceToGo, courseToFixGuidance } from '@fmgc/guidance/lnav/CommonGeometry';
 import { XFLeg } from '@fmgc/guidance/lnav/legs/XF';
-import { Geo } from '@fmgc/utils/Geo';
 import { LnavConfig } from '@fmgc/guidance/LnavConfig';
 import { FixedRadiusTransition } from '@fmgc/guidance/lnav/transitions/FixedRadiusTransition';
 import { PathVector, PathVectorType } from '../PathVector';
@@ -101,10 +100,6 @@ export class CFLeg extends XFLeg {
         return this.course;
     }
 
-    get distance(): NauticalMiles {
-        return Geo.getDistance(this.getPathStartPoint(), this.getPathEndPoint());
-    }
-
     getDistanceToGo(ppos: Coordinates): NauticalMiles {
         return courseToFixDistanceToGo(ppos, this.course, this.getPathEndPoint());
     }
@@ -115,10 +110,6 @@ export class CFLeg extends XFLeg {
 
     getNominalRollAngle(_gs: Knots): Degrees {
         return 0;
-    }
-
-    getPseudoWaypointLocation(_distanceBeforeTerminator: NauticalMiles): Coordinates | undefined {
-        return undefined;
     }
 
     isAbeam(ppos: Coordinates): boolean {

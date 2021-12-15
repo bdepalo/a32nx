@@ -326,20 +326,6 @@ export class DirectToFixTransition extends Transition {
         return params;
     }
 
-    getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): LatLongData | undefined {
-        const distanceRatio = distanceBeforeTerminator / this.distance;
-        const angleFromTerminator = distanceRatio * this.arcSweepAngle;
-
-        const centerToTerminationBearing = Avionics.Utils.computeGreatCircleHeading(this.arcCentrePoint, this.getTurningPoints()[1]);
-
-        return Avionics.Utils.bearingDistanceToCoordinates(
-            Avionics.Utils.clampAngle(centerToTerminationBearing + (this.clockwise ? -angleFromTerminator : angleFromTerminator)),
-            this.radius,
-            this.arcCentrePoint.lat,
-            this.arcCentrePoint.long,
-        );
-    }
-
     getNominalRollAngle(gs: Knots): Degrees {
         const gsMs = gs * (463 / 900);
         return (this.clockwise ? 1 : -1) * Math.atan((gsMs ** 2) / (this.radius * 1852 * 9.81)) * (180 / Math.PI);

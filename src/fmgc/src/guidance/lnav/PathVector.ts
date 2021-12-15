@@ -1,4 +1,5 @@
 import { Coordinates } from '@fmgc/flightplanning/data/geo';
+import { arcLength, pointOnArc, pointOnCourseToFix } from '@fmgc/guidance/lnav/CommonGeometry';
 
 export enum PathVectorType {
     Line,
@@ -36,3 +37,29 @@ export interface DebugPointPathVector {
 }
 
 export type PathVector = LinePathVector | ArcPathVector | DebugPointPathVector
+
+export function pathVectorLength(vector: PathVector) {
+    if (vector.type === PathVectorType.Line) {
+        return Avionics.Utils.computeGreatCircleDistance(vector.startPoint, vector.endPoint);
+    }
+
+    if (vector.type === PathVectorType.Arc) {
+        const radius = Avionics.Utils.computeGreatCircleDistance(vector.startPoint, vector.centrePoint);
+
+        return arcLength(radius, vector.sweepAngle);
+    }
+
+    return 0;
+}
+
+export function pathVectorPoint(vector: PathVector, distanceFromEnd: NauticalMiles): Coordinates | undefined {
+    if (vector.type === PathVectorType.Line) {
+        return pointOnCourseToFix(distanceFromEnd, Avionics.Utils.computeGreatCircleHeading(vector.startPoint, vector.endPoint), vector.endPoint);
+    }
+
+    if (vector.type === PathVectorType.Arc) {
+        return pointOnArc(distanceFromEnd, vector.endPoint, vector.centrePoint, vector.sweepAngle);
+    }
+
+    return undefined;
+}
