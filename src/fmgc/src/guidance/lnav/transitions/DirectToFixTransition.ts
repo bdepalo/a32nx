@@ -111,19 +111,21 @@ export class DirectToFixTransition extends Transition {
             this.revertedTransition = null;
         }
 
-        const turnDirection = trackChange > 0 ? 1 : -1;
+        const turnDirectionSign = trackChange > 0 ? 1 : -1;
+        const turnDirection = turnDirectionSign > 0 ? TurnDirection.Right : TurnDirection.Left;
+
         const currentRollAngle = 0; // TODO: if active leg, current aircraft roll, else 0
-        const rollAngleChange = Math.abs(turnDirection * maxBank(tas, true) - currentRollAngle);
+        const rollAngleChange = Math.abs(turnDirectionSign * maxBank(tas, true) - currentRollAngle);
         const rollAnticipationDistance = Geometry.getRollAnticipationDistance(tas, 0, rollAngleChange);
 
         const itp = rollAnticipationDistance < 0.05 ? termFix
             : Geo.computeDestinationPoint(termFix, rollAnticipationDistance, this.previousLeg.outboundCourse);
-        const turnCentre = Geo.computeDestinationPoint(itp, this.radius, this.previousLeg.outboundCourse + turnDirection * 90);
+        const turnCentre = Geo.computeDestinationPoint(itp, this.radius, this.previousLeg.outboundCourse + turnDirectionSign * 90);
 
         const distanceToFix = Geo.getDistance(turnCentre, nextFix);
 
         if (distanceToFix < this.radius) {
-            if (Math.abs(MathUtils.diffAngle(this.previousLeg.outboundCourse, Geo.getGreatCircleBearing(termFix, nextFix))) < 60) {
+            if (Math.abs(MathUtils.diffAngle(this.previousLeg.outboundCourse, Geo.getGreatCircleBearing(termFix, nextFix), c)) < 60) {
                 this.revertedTransition = null;
 
                 this.hasArc = false;
@@ -159,9 +161,9 @@ export class DirectToFixTransition extends Transition {
         const a3 = Geo.getGreatCircleBearing(turnCentre, nextFix);
         const a5 = acos(this.radius / distanceToFix);
 
-        trackChange = MathUtils.diffAngle(a2, MathUtils.diffAngle(turnDirection * a5, a3), turnDirectionConstraint);
+        trackChange = MathUtils.diffAngle(a2, MathUtils.diffAngle(turnDirectionSign * a5, a3), turnDirection);
 
-        const ftp = Geo.computeDestinationPoint(turnCentre, this.radius, this.previousLeg.outboundCourse + trackChange - 90 * turnDirection);
+        const ftp = Geo.computeDestinationPoint(turnCentre, this.radius, this.previousLeg.outboundCourse + trackChange - 90 * turnDirectionSign);
 
         this.lineStartPoint = this.previousLeg.getPathEndPoint();
         this.lineEndPoint = itp;
