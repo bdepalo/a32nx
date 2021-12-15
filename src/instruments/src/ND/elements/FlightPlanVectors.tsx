@@ -21,12 +21,13 @@ export interface FlightPlanVectorsProps {
  */
 export const FlightPlanVectors: FC<FlightPlanVectorsProps> = memo(({ x, y, mapParams, side, group }) => {
     const [vectors, setVectors] = useState<PathVector[]>([]);
+    const [, setStagingVectors] = useState<PathVector[]>([]);
 
     const lineStyle = vectorsGroupLineStyle(group);
 
     useCoherentEvent(`A32NX_EFIS_VECTORS_${side}_${EfisVectorsGroup[group]}`, useCallback((newVectors: PathVector[], start: number, done: boolean) => {
-        if (vectors) {
-            setVectors((old) => {
+        if (newVectors) {
+            setStagingVectors((old) => {
                 const ret = [...old];
 
                 for (let i = start; i < start + newVectors.length; i++) {
@@ -41,6 +42,8 @@ export const FlightPlanVectors: FC<FlightPlanVectorsProps> = memo(({ x, y, mapPa
                     if (LnavConfig.DEBUG_PATH_DRAWING) {
                         console.log(`[ND/Vectors/${EfisVectorsGroup[group]}] Trimmed after end of transmit: oldSize=${old.length} newSize=${ret.length} trimAfter=${trimAfter}`);
                     }
+
+                    setVectors(ret);
                 }
 
                 return ret;
