@@ -1,9 +1,8 @@
 import { GuidanceController } from '@fmgc/guidance/GuidanceController';
-import { EfisSide, EfisVectorsGroup, Mode } from '@shared/NavigationDisplay';
-import { ArcPathVector, LinePathVector, PathVector } from '@fmgc/guidance/lnav/PathVector';
+import { EfisSide, EfisVectorsGroup } from '@shared/NavigationDisplay';
+import { PathVector, pathVectorLength } from '@fmgc/guidance/lnav/PathVector';
 import { LnavConfig } from '@fmgc/guidance/LnavConfig';
 import { LateralMode } from '@shared/autopilot';
-import { withinEditArea } from '@fmgc/efis/EfisCommon';
 import { TaskCategory } from '@fmgc/guidance/TaskQueue';
 
 const TRANSMIT_GROUP_SIZE = 4;
@@ -25,7 +24,7 @@ export class EfisVectors {
     private currentTemporaryVectors = [];
 
     public forceUpdate() {
-        this.updateTimer = UPDATE_TIMER * 0.8;
+        this.updateTimer = UPDATE_TIMER + 1;
     }
 
     private updateTimer = 0;
@@ -47,9 +46,9 @@ export class EfisVectors {
         const temporaryFlightPlanVectors = this.guidanceController.temporaryGeometry?.getAllPathVectors() ?? [];
 
         const visibleActiveFlightPlanVectors = activeFlightPlanVectors
-            .filter((vector) => this.vectorWithinCurrentEditArea(vector, 'L') || this.vectorWithinCurrentEditArea(vector, 'R'));
+            .filter((vector) => EfisVectors.isVectorReasonable(vector));
         const visibleTemporaryFlightPlanVectors = temporaryFlightPlanVectors
-            .filter((vector) => this.vectorWithinCurrentEditArea(vector, 'L') || this.vectorWithinCurrentEditArea(vector, 'R'));
+            .filter((vector) => EfisVectors.isVectorReasonable(vector));
 
         // ACTIVE
 
@@ -111,24 +110,13 @@ export class EfisVectors {
         }
     }
 
-    private vectorWithinCurrentEditArea(vector: PathVector, efisSide: EfisSide): boolean {
-        const mode = this.guidanceController.efisStateForSide[efisSide].mode;
-        const range = this.guidanceController.efisStateForSide[efisSide].range;
+    /**
+     * Protect against potential perf issues from immense vectors
+     */
+    private static isVectorReasonable(vector: PathVector): boolean {
+        const length = pathVectorLength(vector);
 
-        const ppos = this.guidanceController.lnavDriver.ppos;
-        const planCentre = this.guidanceController.focusedWaypointCoordinates;
-
-        const trueHeading = SimVar.GetSimVarValue('PLANE HEADING DEGREES TRUE', 'degrees');
-
-        const startWithin = withinEditArea(vector.startPoint, range, mode, mode === Mode.PLAN ? planCentre : ppos, trueHeading);
-
-        if ((vector as any).endPoint) {
-            const endWithin = withinEditArea((vector as (LinePathVector | ArcPathVector)).endPoint ?? { lat: 0, long: 0 }, range, mode, mode === Mode.PLAN ? planCentre : ppos, trueHeading);
-
-            return startWithin || endWithin;
-        }
-
-        return startWithin;
+        return length <= 320;
     }
 
     private transmitGroup(vectors: PathVector[], group: EfisVectorsGroup): void {
