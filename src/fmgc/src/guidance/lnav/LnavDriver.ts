@@ -252,8 +252,34 @@ export class LnavDriver implements GuidanceComponent {
                     }
 
                     break;
+                case ControlLaw.TRACK:
+                    const { course } = params;
+
+                    if (!this.lastAvail) {
+                        SimVar.SetSimVarValue('L:A32NX_FG_AVAIL', 'Bool', true);
+                        this.lastAvail = true;
+                    }
+
+                    if (this.lastXTE !== 0) {
+                        SimVar.SetSimVarValue('L:A32NX_FG_CROSS_TRACK_ERROR', 'nautical miles', 0);
+                        this.lastXTE = 0;
+                    }
+
+                    const deltaCourse = MathUtils.diffAngle(trueTrack, course);
+
+                    if (deltaCourse !== this.lastTAE) {
+                        SimVar.SetSimVarValue('L:A32NX_FG_TRACK_ANGLE_ERROR', 'degree', deltaCourse);
+                        this.lastTAE = deltaCourse;
+                    }
+
+                    if (this.lastPhi !== 0) {
+                        SimVar.SetSimVarValue('L:A32NX_FG_PHI_COMMAND', 'degree', 0);
+                        this.lastPhi = 0;
+                    }
+
+                    break;
                 default:
-                    throw new Error(`Invalid control law: ${params.law}`);
+                    break;
                 }
 
                 available = true;
