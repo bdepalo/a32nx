@@ -7,7 +7,6 @@ import { EngineModel } from '../EngineModel';
 import { FlapConf } from '../common';
 import { VerticalCheckpoint, VerticalCheckpointReason } from './ClimbProfileBuilderResult';
 import { Predictions, StepResults } from '../Predictions';
-import { Feet, Knots, NauticalMiles } from '../../../../../../typings/types';
 import { GeometryProfile } from '../GeometryProfile';
 import { AtmosphericConditions } from '../AtmosphericConditions';
 
@@ -177,7 +176,7 @@ export class ClimbPathBuilder {
             if (constraintAltitude > checkpoints[checkpoints.length - 1].altitude) {
                 // Continue climb
                 if (checkpoints[checkpoints.length - 1].reason === VerticalCheckpointReason.WaypointWithConstraint) {
-                    checkpoints[checkpoints.length - 1].reason = VerticalCheckpointReason.ContinueClimb
+                    checkpoints[checkpoints.length - 1].reason = VerticalCheckpointReason.ContinueClimb;
                 }
 
                 this.buildIteratedClimbSegment(geometry, checkpoints, checkpoints[checkpoints.length - 1].altitude, constraintAltitude);
@@ -195,7 +194,7 @@ export class ClimbPathBuilder {
         }
 
         if (checkpoints[checkpoints.length - 1].reason === VerticalCheckpointReason.WaypointWithConstraint) {
-            checkpoints[checkpoints.length - 1].reason = VerticalCheckpointReason.ContinueClimb
+            checkpoints[checkpoints.length - 1].reason = VerticalCheckpointReason.ContinueClimb;
         }
 
         this.buildIteratedClimbSegment(geometry, checkpoints, checkpoints[checkpoints.length - 1].altitude, finalAltitude);
@@ -242,7 +241,7 @@ export class ClimbPathBuilder {
                 continue;
             }
 
-            distanceAlongPath = speedConstraint.distanceFromStart
+            distanceAlongPath = speedConstraint.distanceFromStart;
 
             const speed = Math.min(
                 altitude >= this.climbSpeedLimitAltitude ? this.fmgc.getManagedClimbSpeed() : this.climbSpeedLimit,
@@ -269,7 +268,7 @@ export class ClimbPathBuilder {
         // Move from last constraint to target distance from start
         const speed = Math.min(
             altitude >= this.climbSpeedLimitAltitude ? this.fmgc.getManagedClimbSpeed() : this.climbSpeedLimit,
-            this.findMaxSpeedAtDistanceAlongTrack(geometry, toDistanceFromStart)
+            this.findMaxSpeedAtDistanceAlongTrack(geometry, toDistanceFromStart),
         );
 
         const { fuelBurned } = this.computeLevelFlightSegmentPrediction(
@@ -332,7 +331,7 @@ export class ClimbPathBuilder {
             this.fmgc.getTropoPause(),
             false,
             FlapConf.CLEAN,
-            this.perfFactor
+            this.perfFactor,
         );
     }
 
@@ -512,7 +511,7 @@ export class ClimbPathBuilder {
                 altitude: this.interpolateAltitude(checkpoints, distanceFromStart),
                 remainingFuelOnBoard: this.interpolateRemainingFuelOnboard(checkpoints, distanceFromStart),
                 speed: maxSpeed,
-            })
+            });
         }
     }
 

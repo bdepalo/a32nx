@@ -1,8 +1,6 @@
-import { Feet, Knots, NauticalMiles } from '../../../../../typings';
+import { VnavConfig } from '@fmgc/guidance/vnav/VnavConfig';
 import { VerticalCheckpoint, VerticalCheckpointReason } from './climb/ClimbProfileBuilderResult';
 import { Geometry } from '../Geometry';
-import { TFLeg } from '../lnav/legs/TF';
-import { RFLeg } from '../lnav/legs/RF';
 import { AltitudeConstraint, AltitudeConstraintType, SpeedConstraint, SpeedConstraintType } from '../lnav/legs';
 
 // TODO: Merge this with VerticalCheckpoint
@@ -119,23 +117,19 @@ export class GeometryProfile {
         let totalDistance = this.totalFlightPlanDistance;
 
         for (const [i, leg] of this.geometry.legs.entries()) {
-            if (leg instanceof TFLeg || leg instanceof RFLeg) {
-                const predictedAltitudeAtEndOfLeg = this.interpolateAltitude(totalDistance);
-                const predictedSpeedAtEndOfLeg = this.findSpeedTarget(totalDistance);
+            const predictedAltitudeAtEndOfLeg = this.interpolateAltitude(totalDistance);
+            const predictedSpeedAtEndOfLeg = this.findSpeedTarget(totalDistance);
 
-                predictions.set(i, {
-                    waypointIndex: i,
-                    distanceFromStart: totalDistance,
-                    altitude: predictedAltitudeAtEndOfLeg,
-                    speed: predictedSpeedAtEndOfLeg,
-                    altitudeConstraint: leg.altitudeConstraint,
-                    isAltitudeConstraintMet: this.isAltitudeConstraintMet(predictedAltitudeAtEndOfLeg, leg.altitudeConstraint),
-                    speedConstraint: leg.speedConstraint,
-                    isSpeedConstraintMet: this.isSpeedConstraintMet(predictedSpeedAtEndOfLeg, leg.speedConstraint),
-                });
-            } else {
-                console.warn('[FMS/VNAV] Invalid leg when printing flightplan');
-            }
+            predictions.set(i, {
+                waypointIndex: i,
+                distanceFromStart: totalDistance,
+                altitude: predictedAltitudeAtEndOfLeg,
+                speed: predictedSpeedAtEndOfLeg,
+                altitudeConstraint: leg.altitudeConstraint,
+                isAltitudeConstraintMet: this.isAltitudeConstraintMet(predictedAltitudeAtEndOfLeg, leg.altitudeConstraint),
+                speedConstraint: leg.speedConstraint,
+                isSpeedConstraintMet: this.isSpeedConstraintMet(predictedSpeedAtEndOfLeg, leg.speedConstraint),
+            });
 
             totalDistance -= leg.distance;
         }
@@ -144,28 +138,53 @@ export class GeometryProfile {
     }
 
     findDistanceToTopOfClimbFromEnd(): NauticalMiles | undefined {
-        return this.totalFlightPlanDistance - this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.TopOfClimb)?.distanceFromStart;
+        const distance = this.totalFlightPlanDistance - this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.TopOfClimb)?.distanceFromStart;
+
+        if (distance < 0) {
+            return undefined;
+        }
+
+        return distance;
     }
 
     findDistanceFromEndToEarliestLevelOffForRestriction(): NauticalMiles | undefined {
-        return this.totalFlightPlanDistance - this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.LevelOffForConstraint)?.distanceFromStart;
+        const distance = this.totalFlightPlanDistance - this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.LevelOffForConstraint)?.distanceFromStart;
+
+        if (distance < 0) {
+            return undefined;
+        }
+
+        return distance;
     }
 
     findDistanceFromEndToEarliestContinueClimb(): NauticalMiles | undefined {
-        return this.totalFlightPlanDistance - this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.ContinueClimb)?.distanceFromStart;
+        const distance = this.totalFlightPlanDistance - this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.ContinueClimb)?.distanceFromStart;
+
+        if (distance < 0) {
+            return undefined;
+        }
+
+        return distance;
     }
 
     findDistanceFromEndToSpeedLimit(): NauticalMiles | undefined {
-        return this.totalFlightPlanDistance - this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.CrossingSpeedLimit)?.distanceFromStart;
+        const distance = this.totalFlightPlanDistance - this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.CrossingSpeedLimit)?.distanceFromStart;
+
+        if (distance < 0) {
+            return undefined;
+        }
+
+        return distance;
     }
 
     // TODO: We shouldn't have to go looking for this here...
     // This logic probably belongs to `ClimbPathBuilder`.
-    findSpeedLimit(): [NauticalMiles, Knots] | undefined {
+    findSpeedLimitCrossing(): [NauticalMiles, Knots] | undefined {
         const speedLimit = this.checkpoints.find((checkpoint) => checkpoint.reason === VerticalCheckpointReason.CrossingSpeedLimit);
 
-        if (!speedLimit)
+        if (!speedLimit) {
             return undefined;
+        }
 
         return [speedLimit.distanceFromStart, speedLimit.speed];
     }
@@ -177,7 +196,16 @@ export class GeometryProfile {
         const predictions = this.computePredictionsAtWaypoints();
         console.log(predictions);
 
-        const [speedLimitDistance, speedLimitSpeed] = this.findSpeedLimit();
+        const speedLimitCrossing = this.findSpeedLimitCrossing();
+        if (!speedLimitCrossing) {
+            if (VnavConfig.DEBUG_PROFILE) {
+                console.warn('[FMS/VNAV] No speed limit found.');
+            }
+
+            return [];
+        }
+
+        const [speedLimitDistance, speedLimitSpeed] = speedLimitCrossing;
 
         for (const [i, prediction] of predictions) {
             if (!predictions.has(i + 1)) {

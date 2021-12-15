@@ -25,16 +25,9 @@ export class VnavDriver implements GuidanceComponent {
     constructor(
         private readonly guidanceController: GuidanceController,
         fmgc: Fmgc,
-        flightPlanManager: FlightPlanManager
+        flightPlanManager: FlightPlanManager,
     ) {
         this.climbPathBuilder = new ClimbPathBuilder(fmgc, flightPlanManager);
-    }
-
-    acceptNewMultipleLegGeometry(geometry: Geometry) {
-        // Just put this here to avoid two billion updates per second in update()
-        this.climbPathBuilder.update();
-
-        this.computeVerticalProfile(geometry);
     }
 
     init(): void {
@@ -42,6 +35,9 @@ export class VnavDriver implements GuidanceComponent {
     }
 
     acceptMultipleLegGeometry(geometry: Geometry) {
+        // Just put this here to avoid two billion updates per second in update()
+        this.climbPathBuilder.update();
+
         this.computeVerticalProfile(geometry);
     }
 

@@ -17,7 +17,7 @@ export const VnavConfig = {
     /**
      * Whether to emit ToD pseudo waypoint
      */
-    VNAV_EMIT_TOD: false,
+    VNAV_EMIT_TOD: true,
 
     /**
      * Whether to emit (DECEL) pseudo waypoint
@@ -33,5 +33,7 @@ export const VnavConfig = {
      * Whether to emit CDA flap1/2 pseudo-waypoints (only if VNAV_DESCENT_MODE is CDA)
      */
     VNAV_EMIT_CDA_FLAP_PWP: true,
+
+    DEBUG_PROFILE: true,
 
 };

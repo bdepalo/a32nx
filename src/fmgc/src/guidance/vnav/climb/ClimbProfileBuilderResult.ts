@@ -1,5 +1,3 @@
-import { Feet, Knots, NauticalMiles } from '../../../../../../typings';
-
 export enum VerticalCheckpointReason {
     Liftoff = 'Liftoff',
     ThrustReductionAltitude = 'ThrustReductionAltitude',
