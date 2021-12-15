@@ -76,6 +76,43 @@ export class GuidanceController {
         state.range = ndRange;
     }
 
+    private lastFocusedWpIndex = -1;
+
+    private updateMrpState() {
+        // PLAN mode center
+
+        const focusedWpIndex = SimVar.GetSimVarValue('L:A32NX_SELECTED_WAYPOINT', 'number');
+        const focusedWp = this.flightPlanManager.getWaypoint(focusedWpIndex);
+
+        if (this.lastFocusedWpIndex !== focusedWpIndex) {
+            this.lastFocusedWpIndex = focusedWpIndex;
+
+            this.efisVectors.forceUpdate();
+        }
+
+        if (focusedWp) {
+            this.focusedWaypointCoordinates.lat = focusedWp.infos.coordinates.lat;
+            this.focusedWaypointCoordinates.long = focusedWp.infos.coordinates.long;
+
+            SimVar.SetSimVarValue('L:A32NX_SELECTED_WAYPOINT_LAT', 'Degrees', this.focusedWaypointCoordinates.lat);
+            SimVar.SetSimVarValue('L:A32NX_SELECTED_WAYPOINT_LONG', 'Degrees', this.focusedWaypointCoordinates.long);
+        }
+    }
+
+    private updateMapPartlyDisplayed() {
+        if (this.efisStateForSide.L.dataLimitReached || this.efisStateForSide.L.legsCulled) {
+            SimVar.SetSimVarValue('L:A32NX_EFIS_L_MAP_PARTLY_DISPLAYED', 'boolean', true);
+        } else {
+            SimVar.SetSimVarValue('L:A32NX_EFIS_L_MAP_PARTLY_DISPLAYED', 'boolean', false);
+        }
+
+        if (this.efisStateForSide.R.dataLimitReached || this.efisStateForSide.R.legsCulled) {
+            SimVar.SetSimVarValue('L:A32NX_EFIS_R_MAP_PARTLY_DISPLAYED', 'boolean', true);
+        } else {
+            SimVar.SetSimVarValue('L:A32NX_EFIS_R_MAP_PARTLY_DISPLAYED', 'boolean', false);
+        }
+    }
+
     constructor(flightPlanManager: FlightPlanManager, guidanceManager: GuidanceManager) {
         this.flightPlanManager = flightPlanManager;
         this.guidanceManager = guidanceManager;
@@ -94,8 +131,8 @@ export class GuidanceController {
 
         this.updateGeometries();
 
-        this.leftEfisState = { mode: Mode.ARC, range: 10 };
-        this.rightEfisState = { mode: Mode.ARC, range: 10 };
+        this.leftEfisState = { mode: Mode.ARC, range: 10, dataLimitReached: false, legsCulled: false };
+        this.rightEfisState = { mode: Mode.ARC, range: 10, dataLimitReached: false, legsCulled: false };
         this.efisStateForSide = {
             L: this.leftEfisState,
             R: this.rightEfisState,
@@ -145,18 +182,8 @@ export class GuidanceController {
                 }
             }
 
-            // PLAN mode center
-
-            const focusedWpIndex = SimVar.GetSimVarValue('L:A32NX_SELECTED_WAYPOINT', 'number');
-            const focusedWp = this.flightPlanManager.getWaypoint(focusedWpIndex);
-
-            if (focusedWp) {
-                this.focusedWaypointCoordinates.lat = focusedWp.infos.coordinates.lat;
-                this.focusedWaypointCoordinates.long = focusedWp.infos.coordinates.long;
-
-                SimVar.SetSimVarValue('L:A32NX_SELECTED_WAYPOINT_LAT', 'Degrees', this.focusedWaypointCoordinates.lat);
-                SimVar.SetSimVarValue('L:A32NX_SELECTED_WAYPOINT_LONG', 'Degrees', this.focusedWaypointCoordinates.long);
-            }
+            this.updateMrpState();
+            this.updateMapPartlyDisplayed();
 
             // Main loop
 

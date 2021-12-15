@@ -10,4 +10,8 @@ export interface EfisState {
     mode: Mode,
 
     range: RangeSetting,
+
+    dataLimitReached: boolean,
+
+    legsCulled: boolean,
 }

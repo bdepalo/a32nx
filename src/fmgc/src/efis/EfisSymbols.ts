@@ -366,9 +366,9 @@ export class EfisSymbols {
             const maxSymbols = 640 / wordsPerSymbol;
             if (symbols.length > maxSymbols) {
                 symbols.splice(0, symbols.length - maxSymbols);
-                SimVar.SetSimVarValue(`L:A32NX_EFIS_${side}_MAP_PARTLY_DISPLAYED`, 'boolean', 1);
+                this.guidanceController.efisStateForSide[side].dataLimitReached = true;
             } else {
-                SimVar.SetSimVarValue(`L:A32NX_EFIS_${side}_MAP_PARTLY_DISPLAYED`, 'boolean', 0);
+                this.guidanceController.efisStateForSide[side].dataLimitReached = false;
             }
 
             this.listener.triggerToAllSubscribers(`A32NX_EFIS_${side}_SYMBOLS`, symbols);

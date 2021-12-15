@@ -50,6 +50,14 @@ export class EfisVectors {
         const visibleTemporaryFlightPlanVectors = temporaryFlightPlanVectors
             .filter((vector) => EfisVectors.isVectorReasonable(vector));
 
+        if (visibleActiveFlightPlanVectors.length !== activeFlightPlanVectors.length) {
+            this.guidanceController.efisStateForSide.L.legsCulled = true;
+            this.guidanceController.efisStateForSide.R.legsCulled = true;
+        } else {
+            this.guidanceController.efisStateForSide.L.legsCulled = true;
+            this.guidanceController.efisStateForSide.R.legsCulled = true;
+        }
+
         // ACTIVE
 
         const engagedLateralMode = SimVar.GetSimVarValue('L:A32NX_FMA_LATERAL_MODE', 'Number') as LateralMode;
