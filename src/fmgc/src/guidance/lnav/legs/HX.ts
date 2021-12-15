@@ -307,10 +307,6 @@ export class HMLeg extends XFLeg {
         // console.log(this.predictedPath);
     }
 
-    getPseudoWaypointLocation(_distanceBeforeTerminator: NauticalMiles): LatLongData | undefined {
-        return undefined;
-    }
-
     // TODO are we even using this? What exactly should it tell us?
     isAbeam(_ppos: Coordinates) {
         return false;

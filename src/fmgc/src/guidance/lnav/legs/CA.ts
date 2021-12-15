@@ -150,10 +150,6 @@ export class CALeg extends Leg {
         return undefined;
     }
 
-    getPseudoWaypointLocation(_distanceBeforeTerminator: NauticalMiles): Coordinates | undefined {
-        return undefined;
-    }
-
     isAbeam(_ppos: Coordinates): boolean {
         return false;
     }

@@ -180,20 +180,6 @@ export class CourseCaptureTransition extends Transition {
         return this.nextLeg.getGuidanceParameters(ppos, trueTrack, tas);
     }
 
-    getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): LatLongData | undefined {
-        const distanceRatio = distanceBeforeTerminator / this.distance;
-        const angleFromTerminator = distanceRatio * this.angle;
-
-        const centerToTerminationBearing = Avionics.Utils.computeGreatCircleHeading(this.center, this.getTurningPoints()[1]);
-
-        return Avionics.Utils.bearingDistanceToCoordinates(
-            Avionics.Utils.clampAngle(centerToTerminationBearing + (this.clockwise ? -angleFromTerminator : angleFromTerminator)),
-            this.radius,
-            this.center.lat,
-            this.center.long,
-        );
-    }
-
     getNominalRollAngle(gs: Knots): Degrees {
         const gsMs = gs * (463 / 900);
         return (this.clockwise ? 1 : -1) * Math.atan((gsMs ** 2) / (this.radius * 1852 * 9.81)) * (180 / Math.PI);

@@ -130,10 +130,6 @@ export class DFLeg extends XFLeg {
         return undefined;
     }
 
-    getPseudoWaypointLocation(_distanceBeforeTerminator: NauticalMiles): Coordinates | undefined {
-        return undefined;
-    }
-
     isAbeam(_ppos: Coordinates): boolean {
         return false;
     }

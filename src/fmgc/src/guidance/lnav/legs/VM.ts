@@ -71,7 +71,7 @@ export class VMLeg extends Leg {
     }
 
     get distance(): NauticalMiles {
-        return VM_LEG_SIZE;
+        return 0;
     }
 
     get ident(): string {

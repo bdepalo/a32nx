@@ -53,8 +53,8 @@ export class IFLeg extends XFLeg {
         return undefined;
     }
 
-    get distance(): NauticalMiles | undefined {
-        return undefined;
+    get distance(): NauticalMiles {
+        return 0;
     }
 
     getDistanceToGo(_ppos: Coordinates): NauticalMiles | undefined {

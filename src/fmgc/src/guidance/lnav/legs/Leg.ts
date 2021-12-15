@@ -2,6 +2,7 @@ import { SegmentType } from '@fmgc/flightplanning/FlightPlanSegment';
 import { Coordinates } from '@fmgc/flightplanning/data/geo';
 import { AltitudeConstraint, SpeedConstraint } from '@fmgc/guidance/lnav/legs/index';
 import { Guidable } from '@fmgc/guidance/Guidable';
+import { Geo } from '@fmgc/utils/Geo';
 
 export abstract class Leg extends Guidable {
     segment: SegmentType;
@@ -11,8 +12,6 @@ export abstract class Leg extends Guidable {
     abstract get inboundCourse(): Degrees | undefined;
 
     abstract get outboundCourse(): Degrees | undefined;
-
-    abstract get distance(): NauticalMiles | undefined;
 
     abstract get ident(): string
 
@@ -27,5 +26,9 @@ export abstract class Leg extends Guidable {
     /** @inheritDoc */
     recomputeWithParameters(_isActive: boolean, _tas: Knots, _gs: Knots, _ppos: Coordinates, _trueTrack: DegreesTrue, _previousGuidable: Guidable, _nextGuidable: Guidable): void {
         // Default impl.
+    }
+
+    get distance(): NauticalMiles {
+        return Geo.getDistance(this.getPathStartPoint(), this.getPathEndPoint());
     }
 }

@@ -25,8 +25,6 @@ export class TFLeg extends XFLeg {
 
     constraintType: WaypointConstraintType;
 
-    private mDistance: NauticalMiles;
-
     private course: Degrees;
 
     private computedPath: PathVector[] = [];
@@ -36,7 +34,6 @@ export class TFLeg extends XFLeg {
         this.from = from;
         this.to = to;
         this.fix = to;
-        this.mDistance = Avionics.Utils.computeGreatCircleDistance(this.from.infos.coordinates, this.to.infos.coordinates);
         this.segment = segment;
         this.indexInFullPath = indexInFullPath;
         this.constraintType = to.constraintType;
@@ -104,10 +101,6 @@ export class TFLeg extends XFLeg {
         return false;
     }
 
-    get distance(): NauticalMiles {
-        return this.mDistance;
-    }
-
     get speedConstraint(): SpeedConstraint | undefined {
         return getSpeedConstraintFromWaypoint(this.to);
     }
@@ -124,20 +117,6 @@ export class TFLeg extends XFLeg {
     // TODO: refactor
     get initialAltitudeConstraint(): AltitudeConstraint | undefined {
         return getAltitudeConstraintFromWaypoint(this.from);
-    }
-
-    getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): LatLongData {
-        const inverseBearing = Avionics.Utils.computeGreatCircleHeading(
-            this.to.infos.coordinates,
-            this.from.infos.coordinates,
-        );
-
-        return Avionics.Utils.bearingDistanceToCoordinates(
-            inverseBearing,
-            distanceBeforeTerminator,
-            this.getPathEndPoint().lat,
-            this.getPathEndPoint().long,
-        );
     }
 
     getIntermediatePoint(start: LatLongData, end: LatLongData, fraction: number): LatLongData {

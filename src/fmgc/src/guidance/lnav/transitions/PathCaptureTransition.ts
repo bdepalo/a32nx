@@ -13,7 +13,7 @@ import { Guidable } from '@fmgc/guidance/Guidable';
 import { LnavConfig } from '@fmgc/guidance/LnavConfig';
 import { TurnDirection } from '@fmgc/types/fstypes/FSEnums';
 import { XFLeg } from '@fmgc/guidance/lnav/legs/XF';
-import { maxBank } from '@fmgc/guidance/lnav/CommonGeometry';
+import { arcLength, maxBank } from '@fmgc/guidance/lnav/CommonGeometry';
 import { Leg } from '../legs/Leg';
 import { CFLeg } from '../legs/CF';
 
@@ -91,15 +91,21 @@ export class PathCaptureTransition extends Transition {
                 endPoint: this.previousLeg.getPathEndPoint(),
             });
 
+            this.distance = 0;
+
             return;
         }
 
         if (Math.abs(deltaTrack) > 42 && Math.abs(deltaTrack) < 48 && distanceFromItp > 0.01) {
+            const intercept = Geo.legIntercept(this.previousLeg.getPathEndPoint(), this.previousLeg.outboundCourse, this.nextLeg);
+
             this.predictedPath.push({
                 type: PathVectorType.Line,
                 startPoint: this.previousLeg.getPathEndPoint(),
-                endPoint: Geo.legIntercept(this.previousLeg.getPathEndPoint(), this.previousLeg.outboundCourse, this.nextLeg),
+                endPoint: intercept,
             });
+
+            this.distance = Avionics.Utils.computeGreatCircleDistance(this.previousLeg.getPathEndPoint(), intercept);
 
             return;
         }
@@ -150,6 +156,8 @@ export class PathCaptureTransition extends Transition {
                 centrePoint: turnCenter,
                 sweepAngle: Math.abs(deltaTrack) * turnDirection,
             });
+
+            this.distance = arcLength(radius, Math.abs(deltaTrack) * turnDirection);
 
             if (LnavConfig.DEBUG_PREDICTED_PATH) {
                 this.predictedPath.push(
@@ -215,6 +223,8 @@ export class PathCaptureTransition extends Transition {
             },
         );
 
+        this.distance = arcLength(radius, courseChange) + Avionics.Utils.computeGreatCircleDistance(finalTurningPoint, interceptPoint);
+
         if (LnavConfig.DEBUG_PREDICTED_PATH) {
             this.predictedPath.push(
                 {
@@ -249,9 +259,7 @@ export class PathCaptureTransition extends Transition {
         return false;
     }
 
-    get distance(): NauticalMiles {
-        return 1;
-    }
+    distance = 0;
 
     getTurningPoints(): [Coordinates, Coordinates] {
         return [this.itp, this.ftp];
@@ -263,10 +271,6 @@ export class PathCaptureTransition extends Transition {
 
     getGuidanceParameters(ppos: LatLongAlt, trueTrack: number, _tas: Knots): GuidanceParameters | null {
         return this.nextLeg.getGuidanceParameters(ppos, trueTrack);
-    }
-
-    getPseudoWaypointLocation(_distanceBeforeTerminator: NauticalMiles): Coordinates | undefined {
-        return this.itp;
     }
 
     getNominalRollAngle(_gs: Knots): Degrees {

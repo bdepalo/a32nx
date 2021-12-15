@@ -113,10 +113,6 @@ export class RFLeg extends XFLeg {
         return getAltitudeConstraintFromWaypoint(this.to);
     }
 
-    getPseudoWaypointLocation(distanceBeforeTerminator: NauticalMiles): LatLongData {
-        return pointOnArc(distanceBeforeTerminator, this.to.infos.coordinates, this.center, this.clockwise ? this.angle : -this.angle);
-    }
-
     // basically straight from type 1 transition... willl need refinement
     getGuidanceParameters(ppos: LatLongAlt, trueTrack: number): GuidanceParameters | null {
         // FIXME should be defined in terms of to fix
